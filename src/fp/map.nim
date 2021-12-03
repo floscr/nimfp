@@ -1,6 +1,6 @@
 import ./list,
        sugar,
-       ./option,
+       ./maybe,
        boost/data/rbtree,
        sequtils
 
@@ -30,7 +30,7 @@ proc `$`*[K,V](m: Map[K,V]): string =
   result &= ")"
 
 # sugar.`->` doesn't support ``MapItem[K,V] -> bool`` declaration
-proc find*[K,V](m: Map[K,V], p: proc(i: (K,V)): bool): Option[tuple[k: K, v: V]] =
+proc find*[K,V](m: Map[K,V], p: proc(i: (K,V)): bool): Maybe[tuple[k: K, v: V]] =
   for k, v in m.pairs:
     if p((k,v)):
       return (k: k, v: v).some
@@ -42,7 +42,7 @@ proc filter*[K,V](m: Map[K,V], p: proc(i: (K,V)): bool): Map[K,V] =
     if p((k, v)):
       result = result.add(k, v)
 
-proc get*[K,V](m: Map[K,V], k: K): Option[V] =
+proc get*[K,V](m: Map[K,V], k: K): Maybe[V] =
   var v: V
   if m.maybeGet(k, v):
     some(v)

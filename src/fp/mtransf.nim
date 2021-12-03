@@ -1,49 +1,49 @@
 import sugar,
        classy,
-       ./option,
+       ./maybe,
        ./either,
        ./list
 
 type
-  OptionTOption*[A] = ref object
-    run*: Option[Option[A]]
-  OptionTEither*[E,A] = ref object
-    run*: Either[E,Option[A]]
-  OptionTList*[A] = ref object
-    run*: List[Option[A]]
+  MaybeTMaybe*[A] = ref object
+    run*: Maybe[Maybe[A]]
+  MaybeTEither*[E,A] = ref object
+    run*: Either[E,Maybe[A]]
+  MaybeTList*[A] = ref object
+    run*: List[Maybe[A]]
 
-typeclass OptionTInst, [F[_], OptionTF[_]], exported:
-  proc optionT[A](run: F[Option[A]]): OptionTF[A] =
-    OptionTF[A](run: run)
+typeclass MaybeTInst, [F[_], MaybeTF[_]], exported:
+  proc maybeT[A](run: F[Maybe[A]]): MaybeTF[A] =
+    MaybeTF[A](run: run)
 
-  proc point[A](v: A, t: typedesc[OptionTF[A]]): OptionTF[A] =
-    v.point(F[Option[A]]).optionT
+  proc point[A](v: A, t: typedesc[MaybeTF[A]]): MaybeTF[A] =
+    v.point(F[Maybe[A]]).maybeT
 
-  proc getOrElse[A](o: OptionTF[A], v: A): F[A] =
-    o.run.map((o: Option[A]) => o.getOrElse(v))
+  proc getOrElse[A](o: MaybeTF[A], v: A): F[A] =
+    o.run.map((o: Maybe[A]) => o.getOrElse(v))
 
-  proc getOrElse[A](o: OptionTF[A], f: () -> A): F[A] =
-    o.run.map((o: Option[A]) => o.getOrElse(f))
+  proc getOrElse[A](o: MaybeTF[A], f: () -> A): F[A] =
+    o.run.map((o: Maybe[A]) => o.getOrElse(f))
 
-  proc getOrElseF[A](o: OptionTF[A], f: () -> F[A]): F[A] =
-    o.run.flatMap((o: Option[A]) => o.map((v: A) => v.point(F[A])).getOrElse(f))
+  proc getOrElseF[A](o: MaybeTF[A], f: () -> F[A]): F[A] =
+    o.run.flatMap((o: Maybe[A]) => o.map((v: A) => v.point(F[A])).getOrElse(f))
 
-  proc map[A,B](o: OptionTF[A], f: A -> B): OptionTF[B] =
-    optionT(o.run.map((o: Option[A]) => o.map(f)))
+  proc map[A,B](o: MaybeTF[A], f: A -> B): MaybeTF[B] =
+    maybeT(o.run.map((o: Maybe[A]) => o.map(f)))
 
-  proc flatMap[A,B](o: OptionTF[A], f: A -> OptionTF[B]): OptionTF[B] =
+  proc flatMap[A,B](o: MaybeTF[A], f: A -> MaybeTF[B]): MaybeTF[B] =
     o.run.flatMap(
-      (opt: Option[A]) => (if opt.isDefined: opt.get.f.run else: B.none.point(F[Option[B]]))
-    ).optionT
+      (opt: Maybe[A]) => (if opt.isDefined: opt.get.f.run else: B.none.point(F[Maybe[B]]))
+    ).maybeT
 
-  proc flatMapF[A,B](o: OptionTF[A], f: A -> F[B]): OptionTF[B] =
-    o.flatMap((v: A) => f(v).map((v: B) => v.some).optionT)
+  proc flatMapF[A,B](o: MaybeTF[A], f: A -> F[B]): MaybeTF[B] =
+    o.flatMap((v: A) => f(v).map((v: B) => v.some).maybeT)
 
-  template elemType[A](v: OptionTF[A]): typedesc =
+  template elemType[A](v: MaybeTF[A]): typedesc =
     A
 
-instance OptionTInst, [Option[_], OptionTOption[_]], exporting(_)
+instance MaybeTInst, [Maybe[_], MaybeTMaybe[_]], exporting(_)
 
-instance OptionTInst, E => [Either[E, _], OptionTEither[E,_]], exporting(_)
+instance MaybeTInst, E => [Either[E, _], MaybeTEither[E,_]], exporting(_)
 
-instance OptionTInst, [List[_], OptionTList[_]], exporting(_)
+instance MaybeTInst, [List[_], MaybeTList[_]], exporting(_)

@@ -4,7 +4,7 @@
 
 Nim functional programming library. Includes:
 
-* Option type [src/fp/option.nim](src/fp/option.nim)
+* Maybe type [src/fp/maybe.nim](src/fp/maybe.nim)
 * List type [src/fp/list.nim](src/fp/list.nim)
 * Either type [src/fp/either.nim](src/fp/either.nim)
 * Map type [src/fp/map.nim](src/fp/map.nim)

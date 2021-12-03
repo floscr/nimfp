@@ -2,7 +2,7 @@ import sugar,
        boost/types,
        classy,
        ./list,
-       ./option,
+       ./maybe,
        ./kleisli,
        macros,
        ./function
@@ -253,19 +253,19 @@ proc sequenceU*[E,A](xs: List[Either[E,A]]): Either[E,Unit] =
   xs.traverseU((x: Either[E,A]) => x)
 
 proc traverse*[E, A, B](
-  opt: Option[A],
+  opt: Maybe[A],
   f: A -> Either[E, B]
-): Either[E, Option[B]] =
+): Either[E, Maybe[B]] =
   if opt.isEmpty:
     B.none.right(E)
   else:
     f(opt.get).map((b: B) => b.some)
 
-proc sequence*[E, A](oea: Option[Either[E, A]]): Either[E, Option[A]] =
+proc sequence*[E, A](oea: Maybe[Either[E, A]]): Either[E, Maybe[A]] =
   oea.traverse((ea: Either[E, A]) => ea)
 
 proc traverseU*[E, A, B](
-  opt: Option[A],
+  opt: Maybe[A],
   f: A -> Either[E, B]
 ): Either[E, Unit] =
   if opt.isEmpty:
@@ -276,7 +276,7 @@ proc traverseU*[E, A, B](
       (v: B) => ().right(E)
     )
 
-proc sequenceU*[E, A](oea: Option[Either[E, A]]): Either[E, Unit] =
+proc sequenceU*[E, A](oea: Maybe[Either[E, A]]): Either[E, Unit] =
   oea.traverseU((ea: Either[E, A]) => ea)
 
 proc forEach*[E,A](a: Either[E,A], f: A -> void): void =
@@ -292,16 +292,16 @@ proc condF*[E,A](flag: bool, a: () -> A, e: () -> E): Either[E,A] =
   ## If the condition is satisfied, returns a else returns e
   if flag: a().right(E) else: e().left(A)
 
-proc asEither*[E,A](o: Option[A], e: E): Either[E,A] =
-  ## Converts Option to Either type
+proc asEither*[E,A](o: Maybe[A], e: E): Either[E,A] =
+  ## Converts Maybe to Either type
   condF(o.isDefined, () => o.get, () => e)
 
-proc asEitherF*[E,A](o: Option[A], e: () -> E): Either[E,A] =
-  ## Converts Option to Either type
+proc asEitherF*[E,A](o: Maybe[A], e: () -> E): Either[E,A] =
+  ## Converts Maybe to Either type
   condF(o.isDefined, () => o.get, e())
 
-proc asOption*[E,A](e: Either[E,A]): Option[A] =
-  ## Converts Either to Option type
+proc asMaybe*[E,A](e: Either[E,A]): Maybe[A] =
+  ## Converts Either to Maybe type
   if e.isRight: e.get.some
   else: A.none
 

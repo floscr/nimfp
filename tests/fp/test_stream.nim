@@ -1,4 +1,4 @@
-import ../../src/fp/stream, ../../src/fp/option, sugar, unittest, sequtils
+import ../../src/fp/stream, ../../src/fp/maybe, sugar, unittest, sequtils
 
 suite "Stream":
 
@@ -15,7 +15,7 @@ suite "Stream":
     let sInt = [1, 2, 3, 4, 5].asStream
 
     check: sInt.head == 1
-    check: sInt.headOption == 1.some
+    check: sInt.headMaybe == 1.some
     check: sInt.tail == [2, 3, 4, 5].asStream
 
   test "Functions":

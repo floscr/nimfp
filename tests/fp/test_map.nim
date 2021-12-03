@@ -1,4 +1,4 @@
-import ../../src/fp/option, ../../src/fp/map, ../../src/fp/list, unittest, sugar, strutils
+import ../../src/fp/maybe, ../../src/fp/map, ../../src/fp/list, unittest, sugar, strutils
 
 suite "Map ADT":
   let m = [(1, "1"), (2, "2"), (3, "3")].asMap

@@ -2,30 +2,30 @@ import json,
        sugar,
        typetraits,
        ../either,
-       ../option,
+       ../maybe,
        ../list,
        ../map,
        boost/jsonserialize
 
-proc mget*(n: JsonNode, key: string|int): EitherS[Option[JsonNode]] =
+proc mget*(n: JsonNode, key: string|int): EitherS[Maybe[JsonNode]] =
   ## Returns the child node if it exists, or none.
   ## Returns an error if `key` is int and `n` is not an array, or
   ## if `key` is string and `n` is not an object.
   case n.kind
   of JObject:
     when key is string:
-      n.contains(key).optionF(() => n[key]).rightS
+      n.contains(key).maybeF(() => n[key]).rightS
     else:
-      ("JsonNode.mget: can't use string key with node of type " & $n.kind).left(Option[JsonNode])
+      ("JsonNode.mget: can't use string key with node of type " & $n.kind).left(Maybe[JsonNode])
   of JArray:
     when key is int:
-      (key >= 0 and key < n.len).optionF(() => n[key]).rightS
+      (key >= 0 and key < n.len).maybeF(() => n[key]).rightS
     else:
-      ("JsonNode.mget: can't use int key with node of type " & $n.kind).left(Option[JsonNode])
+      ("JsonNode.mget: can't use int key with node of type " & $n.kind).left(Maybe[JsonNode])
   else:
-    ("JsonNode.mget: can't get the child node from node of type " & $n.kind).left(Option[JsonNode])
+    ("JsonNode.mget: can't get the child node from node of type " & $n.kind).left(Maybe[JsonNode])
 
-proc mget*(n: Option[JsonNode], key: string|int): EitherS[Option[JsonNode]] =
+proc mget*(n: Maybe[JsonNode], key: string|int): EitherS[Maybe[JsonNode]] =
   ## Returns the child node if it exists, or none.
   ## Returns an error if `key` is int and `n` is not an array, or
   ## if `key` is string and `n` is not an object.
@@ -34,8 +34,8 @@ proc mget*(n: Option[JsonNode], key: string|int): EitherS[Option[JsonNode]] =
   else:
     JsonNode.none.rightS
 
-proc mget*(key: string|int): Option[JsonNode] -> EitherS[Option[JsonNode]] =
-  (n: Option[JsonNode]) => n.mget(key)
+proc mget*(key: string|int): Maybe[JsonNode] -> EitherS[Maybe[JsonNode]] =
+  (n: Maybe[JsonNode]) => n.mget(key)
 
 proc value*[T](t: typedesc[T], n: JsonNode): EitherS[T] =
   ## Returns the value of the node `n` of type `t`
@@ -62,34 +62,34 @@ proc value*[T](t: typedesc[T], n: JsonNode): EitherS[T] =
     proc `$`[T](some:typedesc[T]): string = name(T)
     {.fatal: "Can't get value of type " & $T}
 
-proc mvalue*[T](t: typedesc[T]): Option[JsonNode] -> EitherS[Option[T]] =
-  (n: Option[JsonNode]) => (if n.isDefined: value(T, n.get).map((v: T) => v.some) else: T.none.rightS)
+proc mvalue*[T](t: typedesc[T]): Maybe[JsonNode] -> EitherS[Maybe[T]] =
+  (n: Maybe[JsonNode]) => (if n.isDefined: value(T, n.get).map((v: T) => v.some) else: T.none.rightS)
 
 type
   Jsonable* = concept t
     %t is JsonNode
 
-proc mjson*[T: Jsonable](v: T): Option[JsonNode] =
+proc mjson*[T: Jsonable](v: T): Maybe[JsonNode] =
   (%v).some
 
-proc mjson*[T: Jsonable](v: Option[T]): Option[JsonNode] =
+proc mjson*[T: Jsonable](v: Maybe[T]): Maybe[JsonNode] =
   v.map(v => %v)
 
-proc toJsonObject*(xs: List[(string, Option[JsonNode])]): JsonNode =
+proc toJsonObject*(xs: List[(string, Maybe[JsonNode])]): JsonNode =
   var res = newJObject()
   xs.forEach(
-    (v: (string, Option[JsonNode])) => (if v[1].isDefined: res[v[0]] = v[1].get)
+    (v: (string, Maybe[JsonNode])) => (if v[1].isDefined: res[v[0]] = v[1].get)
   )
   return res
 
-proc toJson*[T](v: Option[T]): JsonNode =
+proc toJson*[T](v: Maybe[T]): JsonNode =
   mixin toJson
   if v.isDefined:
     v.get.toJson
   else:
     nil
 
-proc fromJson*[T](_: typedesc[Option[T]], n: JsonNode): Option[T] =
+proc fromJson*[T](_: typedesc[Maybe[T]], n: JsonNode): Maybe[T] =
   mixin fromJson
   if n.isNil or n.kind == JNull:
     T.none

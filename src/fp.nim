@@ -1,4 +1,4 @@
-import ./fp/option,
+import ./fp/maybe,
        ./fp/list,
        ./fp/either,
        ./fp/trym,
@@ -12,7 +12,7 @@ import ./fp/option,
 
        ./fp/std/jsonops
 
-export option,
+export maybe,
        list,
        either,
        trym,

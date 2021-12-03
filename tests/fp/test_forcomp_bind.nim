@@ -1,4 +1,4 @@
-import unittest, fp/option
+import unittest, fp/maybe
 
 from fp/forcomp import act
 

@@ -1,5 +1,5 @@
 import sugar,
-       ./option,
+       ./maybe,
        classy,
        ./kleisli,
        typetraits,
@@ -37,8 +37,8 @@ proc isEmpty*(xs: List): bool =
   ## Checks  if list is empty
   xs.kind == lnkNil
 
-proc headOption*[T](xs: List[T]): Option[T] =
-  ## Returns list's head option
+proc headMaybe*[T](xs: List[T]): Maybe[T] =
+  ## Returns list's head maybe
   if xs.isEmpty: T.none else: xs.head.some
 
 proc tail*[T](xs: List[T]): List[T] =
@@ -117,8 +117,8 @@ proc `++`*[T](xs, ys: List[T]): List[T] =
   xs.append(ys)
 
 # After bug https://github.com/nim-lang/Nim/issues/5647, remove item and seed from type signature
-proc unfoldLeft*[T, U](f: U -> Option[tuple[item: T, seed: U]], x:U): List[T] {. inline .}=
-    ## Build a List from the left from function f: T -> Option(T,T) and a seed of type T
+proc unfoldLeft*[T, U](f: U -> Maybe[tuple[item: T, seed: U]], x:U): List[T] {. inline .}=
+    ## Build a List from the left from function f: T -> Maybe(T,T) and a seed of type T
     result = Nil[T]()
     var a = x
     var b: T
@@ -129,8 +129,8 @@ proc unfoldLeft*[T, U](f: U -> Option[tuple[item: T, seed: U]], x:U): List[T] {.
         result = b ^^ result
         fa = f(a)
 
-proc unfoldRight*[T, U](f: U -> Option[tuple[item: T, seed: U]], x:U): List[T] {. inline .}=
-    ## Build a List from the right from function f: T -> Option(T,T) and a seed of type T
+proc unfoldRight*[T, U](f: U -> Maybe[tuple[item: T, seed: U]], x:U): List[T] {. inline .}=
+    ## Build a List from the right from function f: T -> Maybe(T,T) and a seed of type T
     unfoldLeft(f,x).reverse
 
 proc drop*(xs: List, n: int): List =
@@ -246,7 +246,7 @@ proc zip*[T,U](xs: List[T], ys: List[U]): List[(T,U)] =
 proc unzip*[T,U](xs: List[tuple[t: T, u: U]]): (List[T], List[U]) =
   xs.foldRight((Nil[T](), Nil[U]()), (v: (T,U), r: (List[T], List[U])) => (v[0] ^^ r[0], v[1] ^^ r[1]))
 
-proc find*[T](xs: List[T], p: T -> bool): Option[T] =
+proc find*[T](xs: List[T], p: T -> bool): Maybe[T] =
   ## Finds the first element that satisfies the predicate `p`
   if xs.isEmpty:
     T.none
@@ -256,7 +256,7 @@ proc find*[T](xs: List[T], p: T -> bool): Option[T] =
 proc contains*[T](xs: List[T], x: T): bool =
   xs.find((y: T) => x == y).isDefined
 
-proc lookup*[T, U](xs: List[tuple[t: T, u: U]], key: T): Option[U] =
+proc lookup*[T, U](xs: List[tuple[t: T, u: U]], key: T): Maybe[U] =
   xs.find((pair: (T, U)) => pair[0] == key)
     .map((pair: (T, U)) => pair[1])
 
@@ -278,10 +278,10 @@ proc hasSubsequence*[T](xs: List[T], ys: List[T]): bool =
 #     (x: A, xs: () -> GLB) => f(x).map2F(xs, (y: B, ys: List[B]) => y ^^ ys)
 #   )
 
-# proc traverse*[T,U](xs: List[T], f: T -> Option[U]): Option[List[U]] =
-#   traverseImpl[T,U,Option, Option[U], Option[List[U]]](xs, f)
+# proc traverse*[T,U](xs: List[T], f: T -> Maybe[U]): Maybe[List[U]] =
+#   traverseImpl[T,U,Maybe, Maybe[U], Maybe[List[U]]](xs, f)
 
-proc traverse*[T,U](xs: List[T], f: T -> Option[U]): Option[List[U]] =
+proc traverse*[T,U](xs: List[T], f: T -> Maybe[U]): Maybe[List[U]] =
   ## Transforms the list of `T` into the list of `U` f via `f` only if
   ## all results of applying `f` are defined.
   ## Doesnt execute `f` for elements after the first `None` is encountered.
@@ -301,12 +301,12 @@ proc traverse*[T,U](xs: List[T], f: T -> Option[U]): Option[List[U]] =
     rest = rest.tail
   acc.reverse.some
 
-proc sequence*[T](xs: List[Option[T]]): Option[List[T]] =
-  ## Transforms the list of options into the option of list, which
-  ## is defined only if all of the source list options are defined
-  xs.traverse((x: Option[T]) => x)
+proc sequence*[T](xs: List[Maybe[T]]): Maybe[List[T]] =
+  ## Transforms the list of maybes into the maybe of list, which
+  ## is defined only if all of the source list maybes are defined
+  xs.traverse((x: Maybe[T]) => x)
 
-proc traverseU*[T,U](xs: List[T], f: T -> Option[U]): Option[Unit] =
+proc traverseU*[T,U](xs: List[T], f: T -> Maybe[U]): Maybe[Unit] =
   var rest = xs
   while not rest.isEmpty:
     let headRes = f(rest.head)
@@ -315,8 +315,8 @@ proc traverseU*[T,U](xs: List[T], f: T -> Option[U]): Option[Unit] =
     rest = rest.tail
   ().some
 
-proc sequenceU*[T](xs: List[Option[T]]): Option[Unit] =
-  xs.traverseU((x: Option[T]) => x)
+proc sequenceU*[T](xs: List[Maybe[T]]): Maybe[Unit] =
+  xs.traverseU((x: Maybe[T]) => x)
 
 proc asList*[T](xs: varargs[T]): List[T] =
   ## Creates list from varargs
@@ -330,7 +330,7 @@ proc asList*[T](xs: varargs[T]): List[T] =
 proc asList*[T](xs: List[T]): List[T] =
   xs
 
-proc asList*[T](o: Option[T]): List[T] =
+proc asList*[T](o: Maybe[T]): List[T] =
   if o.isEmpty:
     Nil[T]()
   else:

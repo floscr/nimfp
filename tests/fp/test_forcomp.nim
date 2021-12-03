@@ -1,7 +1,7 @@
 import sugar,
        unittest,
        macros,
-       ../../src/fp/option,
+       ../../src/fp/maybe,
        ../../src/fp/either,
        ../../src/fp/list,
        ../../src/fp/forcomp,
@@ -10,7 +10,7 @@ import sugar,
        sequtils
 
 suite "ForComp":
-  test "Option - manual":
+  test "Maybe - manual":
     # for (x <- 1.some, y <- x + 3) yield y * 100
     check: 1.some.flatMap((x: int) => (x + 3).some).map(y => y * 100) == 400.some
     check: 1.some.flatMap((x: int) => (x + 3).some).flatMap((y: int) => (y * 100).some) == 400.some
@@ -31,7 +31,7 @@ suite "ForComp":
       )
     ) == 9.some
 
-  test "Option - fc macro":
+  test "Maybe - fc macro":
     # for (x <- 1.some, y <- x + 3) yield y * 100
     check: fc[(y*100).some | (
       (x: int) <- 1.some,
@@ -54,7 +54,7 @@ suite "ForComp":
       (y: int) <- (x + 3).rightS
     )] == "Fail".left(int)
 
-  test "Option - act macro":
+  test "Maybe - act macro":
     # for (x <- 1.some, y <- x + 3) yield y * 100
     let res = act:
       (x: int) <- 1.some
@@ -81,7 +81,7 @@ suite "ForComp":
     check: res2 == "Fail".left(int)
 
   test "``if`` example":
-    proc testFunc(i: int): Option[int] = act:
+    proc testFunc(i: int): Maybe[int] = act:
       (x: int) <- (if i < 10: int.none else: i.some)
       (x * 100).some
 
@@ -146,7 +146,7 @@ suite "ForComp":
 
   test "act in generics":
     # https://github.com/nim-lang/Nim/issues/4669
-    proc foo[A](a: A): Option[A] =
+    proc foo[A](a: A): Maybe[A] =
       act:
         a0 <- a.some
         a0.some
@@ -177,7 +177,7 @@ suite "ForComp":
     check: res == success(16)
 
   test "AST change #1":
-    proc pos(x: int): Option[int] = act:
+    proc pos(x: int): Maybe[int] = act:
       y <- (if x < 0: int.none else: x.some)
       z <- act:
         x <- (if y == 0: int.none else: y.some)

@@ -1,5 +1,5 @@
 import sugar,
-       ./option,
+       ./maybe,
        ./list,
        ./function
 
@@ -60,7 +60,7 @@ proc head*[T](xs: Stream[T]): T =
   ## Returns the head of the stream or throws an exception if empty
   xs.h()
 
-proc headOption*[T](xs: Stream[T]): Option[T] =
+proc headMaybe*[T](xs: Stream[T]): Maybe[T] =
   ## Returns the head of the stream or none
   case xs.k
   of snkEmpty: T.none

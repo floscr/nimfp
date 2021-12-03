@@ -1,4 +1,4 @@
-import ../../src/fp/list, ../../src/fp/option, unittest, sugar, boost/types, sequtils, algorithm
+import ../../src/fp/list, ../../src/fp/maybe, unittest, sugar, boost/types, sequtils, algorithm
 
 suite "List ADT":
 
@@ -6,9 +6,9 @@ suite "List ADT":
     let lst = [1, 2, 3, 4, 5].asList
 
     check: lst.head == 1
-    check: lst.headOption == some(1)
+    check: lst.headMaybe == some(1)
     check: lst.tail.asSeq == @[2, 3, 4, 5]
-    check: Nil[int]().headOption == 1.none
+    check: Nil[int]().headMaybe == 1.none
     check: $lst == "List(1, 2, 3, 4, 5)"
     check: 1^^2^^3^^4^^5^^Nil[int]() == lst
     check: ["a", "b"].asList != ["a", "b", "c"].asList
@@ -33,14 +33,14 @@ suite "List ADT":
     check: Nil[int]().foldRight(100, (x, y) => x + y) == 100
 
   test "Unfold operations":
-    proc divmod10(n: int): Option[(int, int)] =
+    proc divmod10(n: int): Maybe[(int, int)] =
       if n == 0: none((int,int))
       else: some(( (n mod 10).int, n div 10))
 
     check: unfoldLeft(divmod10,12301230) == [1,2,3,0,1,2,3,0].asList
     check: unfoldRight(divmod10,12301230) == [0,3,2,1,0,3,2,1].asList
 
-    proc unconsString(s: string): Option[(char, string)] =
+    proc unconsString(s: string): Maybe[(char, string)] =
       if s == "": none((char, string))
       else: some((s[0], s[1..^1]))
 
@@ -48,7 +48,7 @@ suite "List ADT":
     check: unfoldRight(unconsString,"Success !") == ['S', 'u', 'c', 'c', 'e', 's', 's', ' ', '!'].asList
 
     var global_count: int = 0
-    proc divmod10_count(n: int): Option[(int, int)] =
+    proc divmod10_count(n: int): Maybe[(int, int)] =
       inc global_count
       if n == 0: none((int,int))
       else: some(( (n mod 10).int, n div 10))
@@ -123,7 +123,7 @@ suite "List ADT":
     for i, x in lst3:
       check: i == x.pred
 
-  test "List - traverse with Option should allow to properly infer gcsafe":
+  test "List - traverse with Maybe should allow to properly infer gcsafe":
     proc f(i: int): auto = i.some
 
     proc g(): auto {.gcsafe.} =

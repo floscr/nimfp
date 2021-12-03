@@ -1,5 +1,5 @@
 import ../src/fp,
-       ./test_option,
+       ./test_maybe,
        ./test_either,
        ./test_trym,
        ./test_list,

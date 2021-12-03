@@ -1,6 +1,6 @@
-import ../../src/fp/option, unittest, sugar
+import ../../src/fp/maybe, unittest, sugar
 
-suite "Option ADT":
+suite "Maybe ADT":
 
   test "Basic functions":
     let s = "test".some
@@ -20,13 +20,13 @@ suite "Option ADT":
     check: "  ".some.notEmpty == "".none
     check: "123".none.notEmpty == "".none
 
-    check: (2 < 3).optionF(() => true).getOrElse(false)
-    check: (2 < 3).option(true).getOrElse(false)
+    check: (2 < 3).maybeF(() => true).getOrElse(false)
+    check: (2 < 3).maybe(true).getOrElse(false)
 
     check: s.get == "test"
     expect(AssertionError): discard n.get == 10
 
-    check: 1.point(Option) == 1.some
+    check: 1.point(Maybe) == 1.some
 
   test "Map":
     let f = (x: int) => $x
@@ -39,8 +39,8 @@ suite "Option ADT":
     check: 100.some.map2F(() => "Test".some, (x, y) => y & $x) == "Test100".some
     check: 100.some.map2F(() => "Test".none, (x, y) => y & $x) == "".none
 
-    proc badOption(): Option[int] = raise newException(Exception, "Not lazy!")
-    check: int.none.map2F(badOption, (x, y) => $x) == string.none
+    proc badMaybe(): Maybe[int] = raise newException(Exception, "Not lazy!")
+    check: int.none.map2F(badMaybe, (x, y) => $x) == string.none
 
     check: "x".some.map(v => "\"" & v & "\"").getOrElse("y") == "\"x\""
     check: "x".none.map(v => "\"" & v & "\"").getOrElse("y") == "y"
@@ -53,7 +53,7 @@ suite "Option ADT":
   test "Join":
     check: 2.some.some.join == 2.some
     check: int.none.some.join == int.none
-    check: Option[int].none.join == int.none
+    check: Maybe[int].none.join == int.none
 
   test "Getters":
     check: 2.some.getOrElse(3) == 2

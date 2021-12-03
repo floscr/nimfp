@@ -1,6 +1,6 @@
 import ../../src/fp/list,
        ../../src/fp/either,
-       ../../src/fp/option,
+       ../../src/fp/maybe,
        unittest,
        sugar,
        boost/types,
@@ -51,8 +51,8 @@ suite "Either ADT":
     check: "Error".left(int).asEitherE.getLeft.msg == "Error"
     check: newException(Exception, "Error").left(int).asEitherS.getLeft == "Error"
 
-    check: 1.rightS.asOption == 1.some
-    check: ().left(int).asOption == none(int)
+    check: 1.rightS.asMaybe == 1.some
+    check: ().left(int).asMaybe == none(int)
 
     check: 1.rightS.flip == 1.left(string)
     check: 1.left(string).flip == 1.rightS
@@ -153,7 +153,7 @@ suite "Either ADT":
     check: res == "err".left(List[int])
     check: cnt == 2
 
-    # Traverse with Option
+    # Traverse with Maybe
     proc leftFunc(i: int): EitherS[bool] = "foo".left(bool)
     proc rightFunc(i: int): EitherS[bool] = true.rightS
     check: int.none.traverse(rightFunc) == bool.none.rightS
@@ -164,10 +164,10 @@ suite "Either ADT":
     check: 1.some.traverseU(rightFunc) == ().rightS
     check: 1.some.traverseU(leftFunc) == "foo".left(Unit)
 
-    # sequence with Option
+    # sequence with Maybe
     check: 1.rightS.some.sequence == 1.some.rightS
     check: 1.rightS.some.sequenceU == ().rightS
-    check: "foo".left(int).some.sequence == "foo".left(Option[int])
+    check: "foo".left(int).some.sequence == "foo".left(Maybe[int])
     check: "foo".left(int).some.sequenceU == "foo".left(Unit)
     check: EitherS[int].none.sequence == int.none.rightS
     check: EitherS[int].none.sequenceU == ().rightS
