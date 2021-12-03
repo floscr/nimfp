@@ -6,7 +6,8 @@ import sugar,
        ../../src/fp/list,
        ../../src/fp/forcomp,
        ../../src/fp/trym,
-       ../../src/fp/stream
+       ../../src/fp/stream,
+       sequtils
 
 suite "ForComp":
   test "Option - manual":
@@ -125,7 +126,7 @@ suite "ForComp":
     let res = act:
       x <- intStream(1)
       asStream("S" & $x)
-    check: res.take(10).asList == lc[i | (i <- 1..10), int].asList.map(v => "S" & $v)
+    check: res.take(10).asList == toSeq(1..10).asList.map(v => "S" & $v)
 
   test "Custom types":
     proc flatMap[T](s: seq[T], f: T -> seq[T]): seq[T] =
