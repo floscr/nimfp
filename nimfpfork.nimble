@@ -1,5 +1,5 @@
 # Package
-version       = "0.4.5"
+version       = "1.0.0"
 author        = "Anatoly Galiulin <galiulin.anatoly@gmail.com>"
 description   = "Nim functional programming library"
 license       = "MIT"
