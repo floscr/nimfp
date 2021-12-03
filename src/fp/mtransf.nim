@@ -37,7 +37,7 @@ typeclass MaybeTInst, [F[_], MaybeTF[_]], exported:
     ).maybeT
 
   proc flatMapF[A,B](o: MaybeTF[A], f: A -> F[B]): MaybeTF[B] =
-    o.flatMap((v: A) => f(v).map((v: B) => v.some).maybeT)
+    o.flatMap((v: A) => f(v).map((v: B) => v.just).maybeT)
 
   template elemType[A](v: MaybeTF[A]): typedesc =
     A

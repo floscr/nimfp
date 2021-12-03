@@ -259,7 +259,7 @@ proc traverse*[E, A, B](
   if opt.isEmpty:
     B.none.right(E)
   else:
-    f(opt.get).map((b: B) => b.some)
+    f(opt.get).map((b: B) => b.just)
 
 proc sequence*[E, A](oea: Maybe[Either[E, A]]): Either[E, Maybe[A]] =
   oea.traverse((ea: Either[E, A]) => ea)
@@ -302,7 +302,7 @@ proc asEitherF*[E,A](o: Maybe[A], e: () -> E): Either[E,A] =
 
 proc asMaybe*[E,A](e: Either[E,A]): Maybe[A] =
   ## Converts Either to Maybe type
-  if e.isRight: e.get.some
+  if e.isRight: e.get.just
   else: A.none
 
 proc flip*[E,A](e: Either[E,A]): Either[A,E] =

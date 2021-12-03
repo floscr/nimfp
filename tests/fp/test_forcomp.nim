@@ -11,35 +11,35 @@ import sugar,
 
 suite "ForComp":
   test "Maybe - manual":
-    # for (x <- 1.some, y <- x + 3) yield y * 100
-    check: 1.some.flatMap((x: int) => (x + 3).some).map(y => y * 100) == 400.some
-    check: 1.some.flatMap((x: int) => (x + 3).some).flatMap((y: int) => (y * 100).some) == 400.some
-    check: 1.some.flatMap((x: int) =>
-      (x + 3).some.flatMap((y: int) =>
-        (y * 100).some
+    # for (x <- 1.just, y <- x + 3) yield y * 100
+    check: 1.just.flatMap((x: int) => (x + 3).just).map(y => y * 100) == 400.just
+    check: 1.just.flatMap((x: int) => (x + 3).just).flatMap((y: int) => (y * 100).just) == 400.just
+    check: 1.just.flatMap((x: int) =>
+      (x + 3).just.flatMap((y: int) =>
+        (y * 100).just
       )
-    ) == 400.some
-    # for (x <- 1.some, y <- 2.some, doSomething(), z <- y * 3) yield x + y + z
-    let doSomething = () => 100500.some
-    check: 1.some.flatMap((x: int) =>
-      2.some.flatMap((y: int) =>
-        doSomething().flatMap((_: int) =>
-          (y * 3).some.flatMap((z: int) =>
-            (x + y + z).some
+    ) == 400.just
+    # for (x <- 1.just, y <- 2.just, doJustthing(), z <- y * 3) yield x + y + z
+    let doJustthing = () => 100500.just
+    check: 1.just.flatMap((x: int) =>
+      2.just.flatMap((y: int) =>
+        doJustthing().flatMap((_: int) =>
+          (y * 3).just.flatMap((z: int) =>
+            (x + y + z).just
           )
         )
       )
-    ) == 9.some
+    ) == 9.just
 
   test "Maybe - fc macro":
-    # for (x <- 1.some, y <- x + 3) yield y * 100
-    check: fc[(y*100).some | (
-      (x: int) <- 1.some,
-      (y: int) <- (x + 3).some
-    )] == 400.some
-    check: fc[(y*100).some | (
+    # for (x <- 1.just, y <- x + 3) yield y * 100
+    check: fc[(y*100).just | (
+      (x: int) <- 1.just,
+      (y: int) <- (x + 3).just
+    )] == 400.just
+    check: fc[(y*100).just | (
       (x: int) <- int.none,
-      (y: int) <- (x + 3).some
+      (y: int) <- (x + 3).just
     )] == int.none
 
   test "Either - fc macro":
@@ -55,16 +55,16 @@ suite "ForComp":
     )] == "Fail".left(int)
 
   test "Maybe - act macro":
-    # for (x <- 1.some, y <- x + 3) yield y * 100
+    # for (x <- 1.just, y <- x + 3) yield y * 100
     let res = act:
-      (x: int) <- 1.some
-      (y: int) <- (x + 3).some
-      (y*100).some
-    check: res == 400.some
+      (x: int) <- 1.just
+      (y: int) <- (x + 3).just
+      (y*100).just
+    check: res == 400.just
     let res2 = act:
       (x: int) <- int.none
-      (y: int) <- (x + 3).some
-      (y*100).some
+      (y: int) <- (x + 3).just
+      (y*100).just
     check: res2 == int.none
 
   test "Either - act macro":
@@ -82,11 +82,11 @@ suite "ForComp":
 
   test "``if`` example":
     proc testFunc(i: int): Maybe[int] = act:
-      (x: int) <- (if i < 10: int.none else: i.some)
-      (x * 100).some
+      (x: int) <- (if i < 10: int.none else: i.just)
+      (x * 100).just
 
     check: testFunc(1).isDefined == false
-    check: testFunc(20) == 2000.some
+    check: testFunc(20) == 2000.just
 
   test "Lists":
     let res = act:
@@ -103,10 +103,10 @@ suite "ForComp":
     echo res
 
     let resO = act:
-      x <- 1.some
-      y <- (x * 2).some
+      x <- 1.just
+      y <- (x * 2).just
       ().none
-      ("res = " & $y).some
+      ("res = " & $y).just
     echo resO
 
   test "Crash test":
@@ -148,18 +148,18 @@ suite "ForComp":
     # https://github.com/nim-lang/Nim/issues/4669
     proc foo[A](a: A): Maybe[A] =
       act:
-        a0 <- a.some
-        a0.some
+        a0 <- a.just
+        a0.just
 
-    assert: foo("123") == "123".some
+    assert: foo("123") == "123".just
 
   test "Yield in do notation":
     let res = act:
-      x <- 1.some
-      y <- 2.some
-      z <- 3.some
+      x <- 1.just
+      y <- 2.just
+      z <- 3.just
       yield x + y + z
-    check: res == 6.some
+    check: res == 6.just
 
   test "Misc syntax support":
     proc test(x: int): int = x
@@ -178,13 +178,13 @@ suite "ForComp":
 
   test "AST change #1":
     proc pos(x: int): Maybe[int] = act:
-      y <- (if x < 0: int.none else: x.some)
+      y <- (if x < 0: int.none else: x.just)
       z <- act:
-        x <- (if y == 0: int.none else: y.some)
+        x <- (if y == 0: int.none else: y.just)
         yield x
       yield z
 
-    check: pos(1) == 1.some
+    check: pos(1) == 1.just
 
   test "AST change #2":
     let x = act:

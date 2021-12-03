@@ -39,7 +39,7 @@ proc isEmpty*(xs: List): bool =
 
 proc headMaybe*[T](xs: List[T]): Maybe[T] =
   ## Returns list's head maybe
-  if xs.isEmpty: T.none else: xs.head.some
+  if xs.isEmpty: T.none else: xs.head.just
 
 proc tail*[T](xs: List[T]): List[T] =
   ## Returns list's tail
@@ -251,7 +251,7 @@ proc find*[T](xs: List[T], p: T -> bool): Maybe[T] =
   if xs.isEmpty:
     T.none
   else:
-    if p(xs.head): xs.head.some else: xs.tail.find(p)
+    if p(xs.head): xs.head.just else: xs.tail.find(p)
 
 proc contains*[T](xs: List[T], x: T): bool =
   xs.find((y: T) => x == y).isDefined
@@ -299,7 +299,7 @@ proc traverse*[T,U](xs: List[T], f: T -> Maybe[U]): Maybe[List[U]] =
       return List[U].none
     acc = Cons(headRes.get, acc)
     rest = rest.tail
-  acc.reverse.some
+  acc.reverse.just
 
 proc sequence*[T](xs: List[Maybe[T]]): Maybe[List[T]] =
   ## Transforms the list of maybes into the maybe of list, which
@@ -313,7 +313,7 @@ proc traverseU*[T,U](xs: List[T], f: T -> Maybe[U]): Maybe[Unit] =
     if headRes.isEmpty:
       return Unit.none
     rest = rest.tail
-  ().some
+  ().just
 
 proc sequenceU*[T](xs: List[Maybe[T]]): Maybe[Unit] =
   xs.traverseU((x: Maybe[T]) => x)

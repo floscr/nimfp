@@ -33,7 +33,7 @@ proc `$`*[K,V](m: Map[K,V]): string =
 proc find*[K,V](m: Map[K,V], p: proc(i: (K,V)): bool): Maybe[tuple[k: K, v: V]] =
   for k, v in m.pairs:
     if p((k,v)):
-      return (k: k, v: v).some
+      return (k: k, v: v).just
   return none(tuple[k: K, v: V])
 
 proc filter*[K,V](m: Map[K,V], p: proc(i: (K,V)): bool): Map[K,V] =
@@ -45,7 +45,7 @@ proc filter*[K,V](m: Map[K,V], p: proc(i: (K,V)): bool): Map[K,V] =
 proc get*[K,V](m: Map[K,V], k: K): Maybe[V] =
   var v: V
   if m.maybeGet(k, v):
-    some(v)
+    just(v)
   else:
     none(V)
 

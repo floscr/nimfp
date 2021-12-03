@@ -59,18 +59,18 @@ proc value*[T](t: typedesc[T], n: JsonNode): EitherS[T] =
       JBool.checkKind
       n.getBool
   else:
-    proc `$`[T](some:typedesc[T]): string = name(T)
+    proc `$`[T](just:typedesc[T]): string = name(T)
     {.fatal: "Can't get value of type " & $T}
 
 proc mvalue*[T](t: typedesc[T]): Maybe[JsonNode] -> EitherS[Maybe[T]] =
-  (n: Maybe[JsonNode]) => (if n.isDefined: value(T, n.get).map((v: T) => v.some) else: T.none.rightS)
+  (n: Maybe[JsonNode]) => (if n.isDefined: value(T, n.get).map((v: T) => v.just) else: T.none.rightS)
 
 type
   Jsonable* = concept t
     %t is JsonNode
 
 proc mjson*[T: Jsonable](v: T): Maybe[JsonNode] =
-  (%v).some
+  (%v).just
 
 proc mjson*[T: Jsonable](v: Maybe[T]): Maybe[JsonNode] =
   v.map(v => %v)
@@ -94,7 +94,7 @@ proc fromJson*[T](_: typedesc[Maybe[T]], n: JsonNode): Maybe[T] =
   if n.isNil or n.kind == JNull:
     T.none
   else:
-    T.fromJson(n).some
+    T.fromJson(n).just
 
 proc toJson*[T](v: List[T]): JsonNode =
   mixin toJson

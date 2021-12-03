@@ -8,50 +8,50 @@ import sugar,
 
 type
   MaybeKind = enum
-    okNone, okSome
+    okNone, okJust
   Maybe*[T] = ref object
     ## Maybe ADT
     case kind: MaybeKind
-    of okSome:
+    of okJust:
       value: T
     else:
       discard
 
-proc Some*[T](value: T): Maybe[T] =
+proc Just*[T](value: T): Maybe[T] =
   ## Constructs maybe object with value
-  Maybe[T](kind: okSome, value: value)
+  Maybe[T](kind: okJust, value: value)
 
 proc None*[T](): Maybe[T] =
   ## Constructs empty maybe object
   Maybe[T](kind: okNone)
 
-# Some helpers
-proc some*[T](value: T): Maybe[T] = Some(value)
+# Just helpers
+proc just*[T](value: T): Maybe[T] = Just(value)
 proc none*[T](value: T): Maybe[T] = None[T]()
 proc none*(T: typedesc): Maybe[T] = None[T]()
 
 proc notNil*[T](o: Maybe[T]): Maybe[T] =
   ## Maps nil object to none
-  if o.kind == okSome and o.value.isNil:
+  if o.kind == okJust and o.value.isNil:
     none(T)
   else:
     o
 
 proc notEmpty*(o: Maybe[string]): Maybe[string] =
   ## Maps empty string to none
-  if o.kind == okSome and (o.value.strip == ""):
+  if o.kind == okJust and (o.value.strip == ""):
     string.none
   else:
     o
 
 proc maybe*[T](p: bool, v: T): Maybe[T] =
   ## Returns the boxed value of `v` if ``p == true`` or None
-  if p: v.some
+  if p: v.just
   else: T.none
 
 proc maybeF*[T](p: bool, f: () -> T): Maybe[T] =
   ## Returns the boxed value of ``f()`` if ``p == true`` or None
-  if p: f().some
+  if p: f().just
   else: T.none
 
 proc `==`*[T](x, y: Maybe[T]): bool =
@@ -74,14 +74,14 @@ proc `$`*[T](o: Maybe[T]): string =
   ## Returns string representation of `o`
   if o.isDefined:
 
-   "Some(" & $o.value & ")"
+   "Just(" & $o.value & ")"
   else:
     "None"
 
 proc map*[T,U](o: Maybe[T], f: T -> U): Maybe[U] =
   ## Returns maybe with result of applying f to the value of `o` if it exists
   if o.isDefined:
-    f(o.value).some
+    f(o.value).just
   else:
     none(U)
 
@@ -121,7 +121,7 @@ proc filter*[T](o: Maybe[T], p: T -> bool): Maybe[T] =
 
 proc map2*[T,U,V](t: Maybe[T], u: Maybe[U], f: (T, U) -> V): Maybe[V] =
   ## Returns the result of applying f to `t` and `u` value if they are both defined
-  if t.isDefined and u.isDefined: f(t.value, u.value).some else: none(V)
+  if t.isDefined and u.isDefined: f(t.value, u.value).just else: none(V)
 
 proc map2F*[A, B, C](
   ma: Maybe[A],
@@ -134,7 +134,7 @@ proc map2F*[A, B, C](
 proc zip*[T, U](t: Maybe[T], u: Maybe[U]): Maybe[(T, U)] =
   ## Returns the tuple of `t` and `u` values if they are both defined
   if t.isDefined and u.isDefined:
-    (t.get, u.get).some
+    (t.get, u.get).just
   else:
     none((T, U))
 
@@ -161,9 +161,9 @@ proc traverse*[T, U](ts: seq[T], f: T -> Maybe[U]): Maybe[seq[U]] =
   ##
   ## Example:
   ## .. code-block:: nim
-  ##   traverse(@[1, 2, 3], (t: int) => (t - 1).some) == @[0, 1, 2].some
+  ##   traverse(@[1, 2, 3], (t: int) => (t - 1).just) == @[0, 1, 2].just
   ##
-  ##   let f = (t: int) => (if (t < 3): t.some else: int.none)
+  ##   let f = (t: int) => (if (t < 3): t.just else: int.none)
   ##   traverse(@[1, 2, 3], f) == seq[int].none
   var acc = newSeq[U](ts.len)
   for i, t in ts:
@@ -172,7 +172,7 @@ proc traverse*[T, U](ts: seq[T], f: T -> Maybe[U]): Maybe[seq[U]] =
       acc[i] = mu.get
     else:
       return none(seq[U])
-  return acc.some
+  return acc.just
 
 proc asSeq*[T](o: Maybe[T]): seq[T] =
   if o.isDefined:
@@ -185,15 +185,15 @@ template elemType*(v: Maybe): typedesc =
   type(v.get)
 
 proc point*[A](v: A, t: typedesc[Maybe[A]]): Maybe[A] =
-  v.some
+  v.just
 
 instance KleisliInst, Maybe[_], exporting(_)
 
-proc fold*[A,B](v: Maybe[A], ifNone: () -> B, ifSome: A -> B): B =
-  ## Returns the result of applying `ifSome` to the  value if `v` is
+proc fold*[A,B](v: Maybe[A], ifNone: () -> B, ifJust: A -> B): B =
+  ## Returns the result of applying `ifJust` to the  value if `v` is
   ## defined. Otherwise evaluates `ifNone`.
   if v.isDefined:
-    ifSome(v.value)
+    ifJust(v.value)
   else:
     ifNone()
 

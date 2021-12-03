@@ -63,11 +63,11 @@ macro `[]`*(fc: ForComprehension, comp: untyped): untyped =
   ##
   ## .. code-block:: nim
   ##
-  ##   let res = fc[(y*100).some | (
-  ##     (x: int) <- 1.some,
-  ##     (y: int) <- (x + 3).some
+  ##   let res = fc[(y*100).just | (
+  ##     (x: int) <- 1.just,
+  ##     (y: int) <- (x + 3).just
   ##   )]
-  ##   assert(res == 400.some)
+  ##   assert(res == 400.just)
   ##
   ## The only requirement for the user is to implement `foldMap`` function for the type
   ##
@@ -80,10 +80,10 @@ macro act*(comp: untyped): untyped =
   ## .. code-block:: nim
   ##
   ##   let res = act:
-  ##     (x: int) <- 1.some,
-  ##     (y: int) <- (x + 3).some
-  ##     (y*100).some
-  ##   assert(res == 400.some)
+  ##     (x: int) <- 1.just,
+  ##     (y: int) <- (x + 3).just
+  ##     (y*100).just
+  ##   assert(res == 400.just)
   ##
   ## The only requirement for the user is to implement `foldMap`` function for the type
   ##

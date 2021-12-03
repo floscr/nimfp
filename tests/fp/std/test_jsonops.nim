@@ -22,7 +22,7 @@ suite "std.json":
   test "mget":
     check: doc.mget("int").get.isDefined
     check: doc.mget("int2").get.isEmpty
-    let v = doc.some.rightS >>= (mget("obj") >=> mget("int"))
+    let v = doc.just.rightS >>= (mget("obj") >=> mget("int"))
     check: v.get.isDefined
 
   test "value":
@@ -31,11 +31,11 @@ suite "std.json":
     check: value(string, doc["str"]) == "Hello!".rightS
     check: value(int, doc["str"]).isLeft
     check: value(float, doc["float"]) == 1.2.rightS
-    check: doc.some.rightS >>= (
+    check: doc.just.rightS >>= (
       mget("obj") >=>
       mget("int") >=>
       mvalue(int)
-    ) == 20.some.rightS
+    ) == 20.just.rightS
     check: value(bool, doc["bool"]) == true.rightS
 
   test "toJson":
@@ -47,11 +47,11 @@ suite "std.json":
 
   test "boost serialization test":
     data Test, json, show:
-      a = "test".some
+      a = "test".just
       b = asList(1, 2)
       c = asMap({"a": 1, "b": 2})
 
-    check: Test.fromJson(initTest().toJson()).a == "test".some
+    check: Test.fromJson(initTest().toJson()).a == "test".just
     check: Test.fromJson(initTest(a = string.none).toJson()).a == string.none
     check: Test.fromJson(initTest().toJson()).b == asList(1, 2)
     check: Test.fromJson(initTest().toJson()).c == asMap({"a": 1, "b": 2})

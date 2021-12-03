@@ -15,7 +15,7 @@ suite "Stream":
     let sInt = [1, 2, 3, 4, 5].asStream
 
     check: sInt.head == 1
-    check: sInt.headMaybe == 1.some
+    check: sInt.headMaybe == 1.just
     check: sInt.tail == [2, 3, 4, 5].asStream
 
   test "Functions":

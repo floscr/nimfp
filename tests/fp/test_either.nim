@@ -45,13 +45,13 @@ suite "Either ADT":
     check: either.condF(true, () => 1, () => 0) == 1.right(int)
     check: either.condF(false, () => 1, () => 0) == 0.left(int)
 
-    check: 1.some.asEither("nope") == 1.rightS
+    check: 1.just.asEither("nope") == 1.rightS
     check: 1.none.asEither("nope") == "nope".left(int)
 
     check: "Error".left(int).asEitherE.getLeft.msg == "Error"
     check: newException(Exception, "Error").left(int).asEitherS.getLeft == "Error"
 
-    check: 1.rightS.asMaybe == 1.some
+    check: 1.rightS.asMaybe == 1.just
     check: ().left(int).asMaybe == none(int)
 
     check: 1.rightS.flip == 1.left(string)
@@ -160,15 +160,15 @@ suite "Either ADT":
     check: int.none.traverseU(rightFunc) == ().rightS
     check: int.none.traverse(leftFunc) == bool.none.rightS
     check: int.none.traverseU(leftFunc) == ().rightS
-    check: 1.some.traverse(rightFunc) == true.some.rightS
-    check: 1.some.traverseU(rightFunc) == ().rightS
-    check: 1.some.traverseU(leftFunc) == "foo".left(Unit)
+    check: 1.just.traverse(rightFunc) == true.just.rightS
+    check: 1.just.traverseU(rightFunc) == ().rightS
+    check: 1.just.traverseU(leftFunc) == "foo".left(Unit)
 
     # sequence with Maybe
-    check: 1.rightS.some.sequence == 1.some.rightS
-    check: 1.rightS.some.sequenceU == ().rightS
-    check: "foo".left(int).some.sequence == "foo".left(Maybe[int])
-    check: "foo".left(int).some.sequenceU == "foo".left(Unit)
+    check: 1.rightS.just.sequence == 1.just.rightS
+    check: 1.rightS.just.sequenceU == ().rightS
+    check: "foo".left(int).just.sequence == "foo".left(Maybe[int])
+    check: "foo".left(int).just.sequenceU == "foo".left(Unit)
     check: EitherS[int].none.sequence == int.none.rightS
     check: EitherS[int].none.sequenceU == ().rightS
 

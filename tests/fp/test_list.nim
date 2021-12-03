@@ -6,7 +6,7 @@ suite "List ADT":
     let lst = [1, 2, 3, 4, 5].asList
 
     check: lst.head == 1
-    check: lst.headMaybe == some(1)
+    check: lst.headMaybe == just(1)
     check: lst.tail.asSeq == @[2, 3, 4, 5]
     check: Nil[int]().headMaybe == 1.none
     check: $lst == "List(1, 2, 3, 4, 5)"
@@ -35,14 +35,14 @@ suite "List ADT":
   test "Unfold operations":
     proc divmod10(n: int): Maybe[(int, int)] =
       if n == 0: none((int,int))
-      else: some(( (n mod 10).int, n div 10))
+      else: just(( (n mod 10).int, n div 10))
 
     check: unfoldLeft(divmod10,12301230) == [1,2,3,0,1,2,3,0].asList
     check: unfoldRight(divmod10,12301230) == [0,3,2,1,0,3,2,1].asList
 
     proc unconsString(s: string): Maybe[(char, string)] =
       if s == "": none((char, string))
-      else: some((s[0], s[1..^1]))
+      else: just((s[0], s[1..^1]))
 
     check: unfoldLeft(unconsString,"Success !") == ['!', ' ', 's', 's', 'e', 'c', 'c', 'u', 'S'].asList
     check: unfoldRight(unconsString,"Success !") == ['S', 'u', 'c', 'c', 'e', 's', 's', ' ', '!'].asList
@@ -51,7 +51,7 @@ suite "List ADT":
     proc divmod10_count(n: int): Maybe[(int, int)] =
       inc global_count
       if n == 0: none((int,int))
-      else: some(( (n mod 10).int, n div 10))
+      else: just(( (n mod 10).int, n div 10))
 
     let _ = unfoldLeft(divmod10_count,12301230)
     check: global_count == 9
@@ -59,24 +59,24 @@ suite "List ADT":
     check: global_count == 18
 
   test "Transformations":
-    check: @[1, 2, 3].asList.traverse((x: int) => x.some) == @[1, 2, 3].asList.some
-    check: @[1, 2, 3].asList.traverseU((x: int) => x.some) == ().some
-    check: @[1, 2, 3].asList.traverse((x: int) => (if x > 2: x.none else: x.some)) == List[int].none
-    check: @[1, 2, 3].asList.traverseU((x: int) => (if x > 2: x.none else: x.some)) == Unit.none
+    check: @[1, 2, 3].asList.traverse((x: int) => x.just) == @[1, 2, 3].asList.just
+    check: @[1, 2, 3].asList.traverseU((x: int) => x.just) == ().just
+    check: @[1, 2, 3].asList.traverse((x: int) => (if x > 2: x.none else: x.just)) == List[int].none
+    check: @[1, 2, 3].asList.traverseU((x: int) => (if x > 2: x.none else: x.just)) == Unit.none
 
     # traverse should not call f after the first None
     var cnt = 0
     let res = asList(1, 2, 3).traverse do (x: int) -> auto:
       inc cnt
-      if x != 2: x.some
+      if x != 2: x.just
       else: int.none
     check: res == List[int].none
     check: cnt == 2
 
-    check: @[1.some, 2.some, 3.some].asList.sequence == @[1, 2, 3].asList.some
-    check: @[1.some, 2.some, 3.some].asList.sequenceU == ().some
-    check: @[1.some, 2.none, 3.some].asList.sequence == List[int].none
-    check: @[1.some, 2.none, 3.some].asList.sequenceU == Unit.none
+    check: @[1.just, 2.just, 3.just].asList.sequence == @[1, 2, 3].asList.just
+    check: @[1.just, 2.just, 3.just].asList.sequenceU == ().just
+    check: @[1.just, 2.none, 3.just].asList.sequence == List[int].none
+    check: @[1.just, 2.none, 3.just].asList.sequenceU == Unit.none
 
   test "Drop operations":
     let lst = toSeq(1..100).asList
@@ -97,8 +97,8 @@ suite "List ADT":
     check: asList(1, 2, 3).contains(2)
     check: not asList(1, 2, 3).contains(4)
 
-    check: asList((1, 'a'), (2, 'b'), (2, 'c')).lookup(1) == 'a'.some
-    check: asList((1, 'a'), (2, 'b'), (2, 'c')).lookup(2) == 'b'.some
+    check: asList((1, 'a'), (2, 'b'), (2, 'c')).lookup(1) == 'a'.just
+    check: asList((1, 'a'), (2, 'b'), (2, 'c')).lookup(2) == 'b'.just
     check: asList((1, 'a'), (2, 'b'), (2, 'c')).lookup(3) == char.none
 
     check: asList(1, 2, 3).span((i: int) => i <= 2) == (asList(1, 2), asList(3))
@@ -124,7 +124,7 @@ suite "List ADT":
       check: i == x.pred
 
   test "List - traverse with Maybe should allow to properly infer gcsafe":
-    proc f(i: int): auto = i.some
+    proc f(i: int): auto = i.just
 
     proc g(): auto {.gcsafe.} =
       asList(1, 2, 3).traverse(f)
@@ -133,9 +133,9 @@ suite "List ADT":
 
   test "Traversable":
     check: asList(asList(1)) == asList(1)
-    check: asList(1.some) == asList(1)
-    check: asList([1.some].asList) == [1.some].asList
-    when compiles(asList(1.some) == [1.some].asList):
+    check: asList(1.just) == asList(1)
+    check: asList([1.just].asList) == [1.just].asList
+    when compiles(asList(1.just) == [1.just].asList):
       check: false
 
   test "Kleisli":

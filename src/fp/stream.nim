@@ -64,7 +64,7 @@ proc headMaybe*[T](xs: Stream[T]): Maybe[T] =
   ## Returns the head of the stream or none
   case xs.k
   of snkEmpty: T.none
-  else: xs.h().some
+  else: xs.h().just
 
 proc tail*[T](xs: Stream[T]): Stream[T] =
   ## Return the tail of the stream
