@@ -57,11 +57,5 @@ task test_option, "Run Option tests":
 task test_forcomp, "Run for comprehension tests":
   test "forcomp"
 
-task test_concurrent, "Run concurrent tests":
-  test "concurrent"
-
-task test_futurem, "Run futurem tests":
-  test "futurem"
-
 task ex_httpactor, "Run httpactor example":
   example "httpactor", "httpactor" / "main"
