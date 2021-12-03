@@ -16,7 +16,7 @@ suite "Monad transformers":
 
     proc getArticle(id: int): Maybe[Maybe[string]] =
       if id == 0:
-        none(Maybe[string])
+        nothing(Maybe[string])
       else:
         ($id).just.just
     let articles = act:
@@ -29,7 +29,7 @@ suite "Monad transformers":
       a <- articles
       bad <- maybeT(getArticle(0))
       (a[0], a[1], a[2], bad).just.just.maybeT
-    check: badArticles.run == none(Maybe[(string, string, string, string)])
+    check: badArticles.run == nothing(Maybe[(string, string, string, string)])
 
   test "MaybeTEither":
     let v = maybeT(1.just.rightS)
@@ -80,7 +80,7 @@ suite "Monad transformers":
     check: badArticles.run == Nil[Maybe[List[string]]]()
 
   test "Misc functions":
-    check: string.none.just.maybeT.getOrElse("1") == "1".just
-    check: string.none.just.maybeT.getOrElse(() => "1") == "1".just
+    check: string.nothing.just.maybeT.getOrElse("1") == "1".just
+    check: string.nothing.just.maybeT.getOrElse(() => "1") == "1".just
 
-    check: string.none.rightS.maybeT.getOrElseF(() => "Error".left(string)) == "Error".left(string)
+    check: string.nothing.rightS.maybeT.getOrElseF(() => "Error".left(string)) == "Error".left(string)

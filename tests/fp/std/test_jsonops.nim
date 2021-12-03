@@ -42,7 +42,7 @@ suite "std.json":
     check: [
       ("a", 1.mjson),
       ("b", "a".mjson),
-      ("c", int64.none.mjson),
+      ("c", int64.nothing.mjson),
     ].asList.toJsonObject == %*{ "a": 1, "b": "a" }
 
   test "boost serialization test":
@@ -52,6 +52,6 @@ suite "std.json":
       c = asMap({"a": 1, "b": 2})
 
     check: Test.fromJson(initTest().toJson()).a == "test".just
-    check: Test.fromJson(initTest(a = string.none).toJson()).a == string.none
+    check: Test.fromJson(initTest(a = string.nothing).toJson()).a == string.nothing
     check: Test.fromJson(initTest().toJson()).b == asList(1, 2)
     check: Test.fromJson(initTest().toJson()).c == asMap({"a": 1, "b": 2})

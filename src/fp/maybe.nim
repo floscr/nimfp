@@ -8,7 +8,7 @@ import sugar,
 
 type
   MaybeKind = enum
-    okNone, okJust
+    okNothing, okJust
   Maybe*[T] = ref object
     ## Maybe ADT
     case kind: MaybeKind
@@ -21,38 +21,38 @@ proc Just*[T](value: T): Maybe[T] =
   ## Constructs maybe object with value
   Maybe[T](kind: okJust, value: value)
 
-proc None*[T](): Maybe[T] =
+proc Nothing*[T](): Maybe[T] =
   ## Constructs empty maybe object
-  Maybe[T](kind: okNone)
+  Maybe[T](kind: okNothing)
 
 # Just helpers
 proc just*[T](value: T): Maybe[T] = Just(value)
-proc none*[T](value: T): Maybe[T] = None[T]()
-proc none*(T: typedesc): Maybe[T] = None[T]()
+proc nothing*[T](value: T): Maybe[T] = Nothing[T]()
+proc nothing*(T: typedesc): Maybe[T] = Nothing[T]()
 
 proc notNil*[T](o: Maybe[T]): Maybe[T] =
-  ## Maps nil object to none
+  ## Maps nil object to nothing
   if o.kind == okJust and o.value.isNil:
-    none(T)
+    nothing(T)
   else:
     o
 
 proc notEmpty*(o: Maybe[string]): Maybe[string] =
-  ## Maps empty string to none
+  ## Maps empty string to nothing
   if o.kind == okJust and (o.value.strip == ""):
-    string.none
+    string.nothing
   else:
     o
 
 proc maybe*[T](p: bool, v: T): Maybe[T] =
-  ## Returns the boxed value of `v` if ``p == true`` or None
+  ## Returns the boxed value of `v` if ``p == true`` or Nothing
   if p: v.just
-  else: T.none
+  else: T.nothing
 
 proc maybeF*[T](p: bool, f: () -> T): Maybe[T] =
-  ## Returns the boxed value of ``f()`` if ``p == true`` or None
+  ## Returns the boxed value of ``f()`` if ``p == true`` or Nothing
   if p: f().just
-  else: T.none
+  else: T.nothing
 
 proc `==`*[T](x, y: Maybe[T]): bool =
   if x.isDefined and y.isDefined:
@@ -64,7 +64,7 @@ proc `==`*[T](x, y: Maybe[T]): bool =
 
 proc isEmpty*[T](o: Maybe[T]): bool =
   ## Checks if `o` is empty
-  o.kind == okNone
+  o.kind == okNothing
 
 proc isDefined*[T](o: Maybe[T]): bool =
   ## Checks if `o` contains value
@@ -76,18 +76,18 @@ proc `$`*[T](o: Maybe[T]): string =
 
    "Just(" & $o.value & ")"
   else:
-    "None"
+    "Nothing"
 
 proc map*[T,U](o: Maybe[T], f: T -> U): Maybe[U] =
   ## Returns maybe with result of applying f to the value of `o` if it exists
   if o.isDefined:
     f(o.value).just
   else:
-    none(U)
+    nothing(U)
 
 proc flatMap*[T,U](o: Maybe[T], f: T -> Maybe[U]): Maybe[U] =
-  ## Returns the result of applying `f` if `o` is defined, or none
-  if o.isDefined: f(o.value) else: none(U)
+  ## Returns the result of applying `f` if `o` is defined, or nothing
+  if o.isDefined: f(o.value) else: nothing(U)
 
 proc join*[T](mmt: Maybe[Maybe[T]]): Maybe[T] =
   ## Flattens the maybe
@@ -117,11 +117,11 @@ proc orElse*[T](o: Maybe[T], f: void -> Maybe[T]): Maybe[T] =
 proc filter*[T](o: Maybe[T], p: T -> bool): Maybe[T] =
   ## Returns `o` if it is defined and the result of applying `p`
   ## to it's value is true
-  if o.isDefined and p(o.value): o else: none(T)
+  if o.isDefined and p(o.value): o else: nothing(T)
 
 proc map2*[T,U,V](t: Maybe[T], u: Maybe[U], f: (T, U) -> V): Maybe[V] =
   ## Returns the result of applying f to `t` and `u` value if they are both defined
-  if t.isDefined and u.isDefined: f(t.value, u.value).just else: none(V)
+  if t.isDefined and u.isDefined: f(t.value, u.value).just else: nothing(V)
 
 proc map2F*[A, B, C](
   ma: Maybe[A],
@@ -136,7 +136,7 @@ proc zip*[T, U](t: Maybe[T], u: Maybe[U]): Maybe[(T, U)] =
   if t.isDefined and u.isDefined:
     (t.get, u.get).just
   else:
-    none((T, U))
+    nothing((T, U))
 
 proc liftO*[T,U](f: T -> U): proc(o: Maybe[T]): Maybe[U] =
   ## Turns the function `f` of type `T -> U` into the function
@@ -163,15 +163,15 @@ proc traverse*[T, U](ts: seq[T], f: T -> Maybe[U]): Maybe[seq[U]] =
   ## .. code-block:: nim
   ##   traverse(@[1, 2, 3], (t: int) => (t - 1).just) == @[0, 1, 2].just
   ##
-  ##   let f = (t: int) => (if (t < 3): t.just else: int.none)
-  ##   traverse(@[1, 2, 3], f) == seq[int].none
+  ##   let f = (t: int) => (if (t < 3): t.just else: int.nothing)
+  ##   traverse(@[1, 2, 3], f) == seq[int].nothing
   var acc = newSeq[U](ts.len)
   for i, t in ts:
     let mu = f(t)
     if mu.isDefined:
       acc[i] = mu.get
     else:
-      return none(seq[U])
+      return nothing(seq[U])
   return acc.just
 
 proc asSeq*[T](o: Maybe[T]): seq[T] =
@@ -189,13 +189,13 @@ proc point*[A](v: A, t: typedesc[Maybe[A]]): Maybe[A] =
 
 instance KleisliInst, Maybe[_], exporting(_)
 
-proc fold*[A,B](v: Maybe[A], ifNone: () -> B, ifJust: A -> B): B =
+proc fold*[A,B](v: Maybe[A], ifNothing: () -> B, ifJust: A -> B): B =
   ## Returns the result of applying `ifJust` to the  value if `v` is
-  ## defined. Otherwise evaluates `ifNone`.
+  ## defined. Otherwise evaluates `ifNothing`.
   if v.isDefined:
     ifJust(v.value)
   else:
-    ifNone()
+    ifNothing()
 
 proc foldLeft*[A,B](v: Maybe[A], b: B, f: (B, A) -> B): B =
   if v.isDefined:

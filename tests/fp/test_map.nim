@@ -9,12 +9,12 @@ suite "Map ADT":
     check: m.get(1) == "1".just
     check: m.get(2) == "2".just
     check: m.get(3) == "3".just
-    check: m.get(4) == "4".none
+    check: m.get(4) == "4".nothing
 
   test "Transformations":
     check: (m + (4, "4")).get(4) == "4".just
     check: (m + (1, "11")).get(1) == "11".just
-    check: (m - 1).get(1) == "11".none
+    check: (m - 1).get(1) == "11".nothing
 
     let r = m.map((i: (int,string)) => ($i.key, i.value.parseInt))
     check: r == [("3", 3), ("1", 1), ("2", 2)].asMap
@@ -27,7 +27,7 @@ suite "Map ADT":
     check: x == 20500
     check: map.find(m, v => (v[0] mod 2 == 0)) == (2, "2").just
     check: m.filter(v => (v[0] mod 2 == 0)) == [(2, "2")].asMap
-    check: m.remove(1).get(1) == string.none
+    check: m.remove(1).get(1) == string.nothing
     check: m.map(i => (i[0] * 2, i[1] & i[1])) == [(2, "11"), (4, "22"), (6, "33")].asMap
     check: m.forAll(i => $i[0] == i[1])
 

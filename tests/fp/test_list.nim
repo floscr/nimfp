@@ -8,7 +8,7 @@ suite "List ADT":
     check: lst.head == 1
     check: lst.headMaybe == just(1)
     check: lst.tail.asSeq == @[2, 3, 4, 5]
-    check: Nil[int]().headMaybe == 1.none
+    check: Nil[int]().headMaybe == 1.nothing
     check: $lst == "List(1, 2, 3, 4, 5)"
     check: 1^^2^^3^^4^^5^^Nil[int]() == lst
     check: ["a", "b"].asList != ["a", "b", "c"].asList
@@ -34,14 +34,14 @@ suite "List ADT":
 
   test "Unfold operations":
     proc divmod10(n: int): Maybe[(int, int)] =
-      if n == 0: none((int,int))
+      if n == 0: nothing((int,int))
       else: just(( (n mod 10).int, n div 10))
 
     check: unfoldLeft(divmod10,12301230) == [1,2,3,0,1,2,3,0].asList
     check: unfoldRight(divmod10,12301230) == [0,3,2,1,0,3,2,1].asList
 
     proc unconsString(s: string): Maybe[(char, string)] =
-      if s == "": none((char, string))
+      if s == "": nothing((char, string))
       else: just((s[0], s[1..^1]))
 
     check: unfoldLeft(unconsString,"Success !") == ['!', ' ', 's', 's', 'e', 'c', 'c', 'u', 'S'].asList
@@ -50,7 +50,7 @@ suite "List ADT":
     var global_count: int = 0
     proc divmod10_count(n: int): Maybe[(int, int)] =
       inc global_count
-      if n == 0: none((int,int))
+      if n == 0: nothing((int,int))
       else: just(( (n mod 10).int, n div 10))
 
     let _ = unfoldLeft(divmod10_count,12301230)
@@ -61,22 +61,22 @@ suite "List ADT":
   test "Transformations":
     check: @[1, 2, 3].asList.traverse((x: int) => x.just) == @[1, 2, 3].asList.just
     check: @[1, 2, 3].asList.traverseU((x: int) => x.just) == ().just
-    check: @[1, 2, 3].asList.traverse((x: int) => (if x > 2: x.none else: x.just)) == List[int].none
-    check: @[1, 2, 3].asList.traverseU((x: int) => (if x > 2: x.none else: x.just)) == Unit.none
+    check: @[1, 2, 3].asList.traverse((x: int) => (if x > 2: x.nothing else: x.just)) == List[int].nothing
+    check: @[1, 2, 3].asList.traverseU((x: int) => (if x > 2: x.nothing else: x.just)) == Unit.nothing
 
-    # traverse should not call f after the first None
+    # traverse should not call f after the first Nothing
     var cnt = 0
     let res = asList(1, 2, 3).traverse do (x: int) -> auto:
       inc cnt
       if x != 2: x.just
-      else: int.none
-    check: res == List[int].none
+      else: int.nothing
+    check: res == List[int].nothing
     check: cnt == 2
 
     check: @[1.just, 2.just, 3.just].asList.sequence == @[1, 2, 3].asList.just
     check: @[1.just, 2.just, 3.just].asList.sequenceU == ().just
-    check: @[1.just, 2.none, 3.just].asList.sequence == List[int].none
-    check: @[1.just, 2.none, 3.just].asList.sequenceU == Unit.none
+    check: @[1.just, 2.nothing, 3.just].asList.sequence == List[int].nothing
+    check: @[1.just, 2.nothing, 3.just].asList.sequenceU == Unit.nothing
 
   test "Drop operations":
     let lst = toSeq(1..100).asList
@@ -99,7 +99,7 @@ suite "List ADT":
 
     check: asList((1, 'a'), (2, 'b'), (2, 'c')).lookup(1) == 'a'.just
     check: asList((1, 'a'), (2, 'b'), (2, 'c')).lookup(2) == 'b'.just
-    check: asList((1, 'a'), (2, 'b'), (2, 'c')).lookup(3) == char.none
+    check: asList((1, 'a'), (2, 'b'), (2, 'c')).lookup(3) == char.nothing
 
     check: asList(1, 2, 3).span((i: int) => i <= 2) == (asList(1, 2), asList(3))
     check: asList(1, 2, 3).span((i: int) => i mod 2 == 1) == (asList(1), asList(2, 3))

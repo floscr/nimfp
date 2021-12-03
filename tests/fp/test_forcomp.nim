@@ -38,9 +38,9 @@ suite "ForComp":
       (y: int) <- (x + 3).just
     )] == 400.just
     check: fc[(y*100).just | (
-      (x: int) <- int.none,
+      (x: int) <- int.nothing,
       (y: int) <- (x + 3).just
-    )] == int.none
+    )] == int.nothing
 
   test "Either - fc macro":
     # for (x <- 1.rightS, y <- x + 3) yield y * 100
@@ -62,10 +62,10 @@ suite "ForComp":
       (y*100).just
     check: res == 400.just
     let res2 = act:
-      (x: int) <- int.none
+      (x: int) <- int.nothing
       (y: int) <- (x + 3).just
       (y*100).just
-    check: res2 == int.none
+    check: res2 == int.nothing
 
   test "Either - act macro":
     # for (x <- 1.rightS, y <- x + 3) yield y * 100
@@ -82,7 +82,7 @@ suite "ForComp":
 
   test "``if`` example":
     proc testFunc(i: int): Maybe[int] = act:
-      (x: int) <- (if i < 10: int.none else: i.just)
+      (x: int) <- (if i < 10: int.nothing else: i.just)
       (x * 100).just
 
     check: testFunc(1).isDefined == false
@@ -105,7 +105,7 @@ suite "ForComp":
     let resO = act:
       x <- 1.just
       y <- (x * 2).just
-      ().none
+      ().nothing
       ("res = " & $y).just
     echo resO
 
@@ -178,9 +178,9 @@ suite "ForComp":
 
   test "AST change #1":
     proc pos(x: int): Maybe[int] = act:
-      y <- (if x < 0: int.none else: x.just)
+      y <- (if x < 0: int.nothing else: x.just)
       z <- act:
-        x <- (if y == 0: int.none else: y.just)
+        x <- (if y == 0: int.nothing else: y.just)
         yield x
       yield z
 

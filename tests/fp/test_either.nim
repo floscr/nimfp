@@ -46,13 +46,13 @@ suite "Either ADT":
     check: either.condF(false, () => 1, () => 0) == 0.left(int)
 
     check: 1.just.asEither("nope") == 1.rightS
-    check: 1.none.asEither("nope") == "nope".left(int)
+    check: 1.nothing.asEither("nope") == "nope".left(int)
 
     check: "Error".left(int).asEitherE.getLeft.msg == "Error"
     check: newException(Exception, "Error").left(int).asEitherS.getLeft == "Error"
 
     check: 1.rightS.asMaybe == 1.just
-    check: ().left(int).asMaybe == none(int)
+    check: ().left(int).asMaybe == nothing(int)
 
     check: 1.rightS.flip == 1.left(string)
     check: 1.left(string).flip == 1.rightS
@@ -156,10 +156,10 @@ suite "Either ADT":
     # Traverse with Maybe
     proc leftFunc(i: int): EitherS[bool] = "foo".left(bool)
     proc rightFunc(i: int): EitherS[bool] = true.rightS
-    check: int.none.traverse(rightFunc) == bool.none.rightS
-    check: int.none.traverseU(rightFunc) == ().rightS
-    check: int.none.traverse(leftFunc) == bool.none.rightS
-    check: int.none.traverseU(leftFunc) == ().rightS
+    check: int.nothing.traverse(rightFunc) == bool.nothing.rightS
+    check: int.nothing.traverseU(rightFunc) == ().rightS
+    check: int.nothing.traverse(leftFunc) == bool.nothing.rightS
+    check: int.nothing.traverseU(leftFunc) == ().rightS
     check: 1.just.traverse(rightFunc) == true.just.rightS
     check: 1.just.traverseU(rightFunc) == ().rightS
     check: 1.just.traverseU(leftFunc) == "foo".left(Unit)
@@ -169,8 +169,8 @@ suite "Either ADT":
     check: 1.rightS.just.sequenceU == ().rightS
     check: "foo".left(int).just.sequence == "foo".left(Maybe[int])
     check: "foo".left(int).just.sequenceU == "foo".left(Unit)
-    check: EitherS[int].none.sequence == int.none.rightS
-    check: EitherS[int].none.sequenceU == ().rightS
+    check: EitherS[int].nothing.sequence == int.nothing.rightS
+    check: EitherS[int].nothing.sequenceU == ().rightS
 
   test "Traverse with List should allow to properly infer gcsafe":
     proc f(i: int): auto = i.rightS

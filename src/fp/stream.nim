@@ -61,9 +61,9 @@ proc head*[T](xs: Stream[T]): T =
   xs.h()
 
 proc headMaybe*[T](xs: Stream[T]): Maybe[T] =
-  ## Returns the head of the stream or none
+  ## Returns the head of the stream or nothing
   case xs.k
-  of snkEmpty: T.none
+  of snkEmpty: T.nothing
   else: xs.h().just
 
 proc tail*[T](xs: Stream[T]): Stream[T] =

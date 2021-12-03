@@ -39,7 +39,7 @@ proc isEmpty*(xs: List): bool =
 
 proc headMaybe*[T](xs: List[T]): Maybe[T] =
   ## Returns list's head maybe
-  if xs.isEmpty: T.none else: xs.head.just
+  if xs.isEmpty: T.nothing else: xs.head.just
 
 proc tail*[T](xs: List[T]): List[T] =
   ## Returns list's tail
@@ -249,7 +249,7 @@ proc unzip*[T,U](xs: List[tuple[t: T, u: U]]): (List[T], List[U]) =
 proc find*[T](xs: List[T], p: T -> bool): Maybe[T] =
   ## Finds the first element that satisfies the predicate `p`
   if xs.isEmpty:
-    T.none
+    T.nothing
   else:
     if p(xs.head): xs.head.just else: xs.tail.find(p)
 
@@ -284,7 +284,7 @@ proc hasSubsequence*[T](xs: List[T], ys: List[T]): bool =
 proc traverse*[T,U](xs: List[T], f: T -> Maybe[U]): Maybe[List[U]] =
   ## Transforms the list of `T` into the list of `U` f via `f` only if
   ## all results of applying `f` are defined.
-  ## Doesnt execute `f` for elements after the first `None` is encountered.
+  ## Doesnt execute `f` for elements after the first `Nothing` is encountered.
 
   # Implementation with foldRightF breaks semcheck when inferring
   # gcsafe. So we have to keep this basic.
@@ -296,7 +296,7 @@ proc traverse*[T,U](xs: List[T], f: T -> Maybe[U]): Maybe[List[U]] =
   while not rest.isEmpty:
     let headRes = f(rest.head)
     if headRes.isEmpty:
-      return List[U].none
+      return List[U].nothing
     acc = Cons(headRes.get, acc)
     rest = rest.tail
   acc.reverse.just
@@ -311,7 +311,7 @@ proc traverseU*[T,U](xs: List[T], f: T -> Maybe[U]): Maybe[Unit] =
   while not rest.isEmpty:
     let headRes = f(rest.head)
     if headRes.isEmpty:
-      return Unit.none
+      return Unit.nothing
     rest = rest.tail
   ().just
 

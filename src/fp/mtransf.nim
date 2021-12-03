@@ -33,7 +33,7 @@ typeclass MaybeTInst, [F[_], MaybeTF[_]], exported:
 
   proc flatMap[A,B](o: MaybeTF[A], f: A -> MaybeTF[B]): MaybeTF[B] =
     o.run.flatMap(
-      (opt: Maybe[A]) => (if opt.isDefined: opt.get.f.run else: B.none.point(F[Maybe[B]]))
+      (opt: Maybe[A]) => (if opt.isDefined: opt.get.f.run else: B.nothing.point(F[Maybe[B]]))
     ).maybeT
 
   proc flatMapF[A,B](o: MaybeTF[A], f: A -> F[B]): MaybeTF[B] =

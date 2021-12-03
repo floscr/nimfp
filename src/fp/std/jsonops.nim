@@ -8,7 +8,7 @@ import json,
        boost/jsonserialize
 
 proc mget*(n: JsonNode, key: string|int): EitherS[Maybe[JsonNode]] =
-  ## Returns the child node if it exists, or none.
+  ## Returns the child node if it exists, or nothing.
   ## Returns an error if `key` is int and `n` is not an array, or
   ## if `key` is string and `n` is not an object.
   case n.kind
@@ -26,13 +26,13 @@ proc mget*(n: JsonNode, key: string|int): EitherS[Maybe[JsonNode]] =
     ("JsonNode.mget: can't get the child node from node of type " & $n.kind).left(Maybe[JsonNode])
 
 proc mget*(n: Maybe[JsonNode], key: string|int): EitherS[Maybe[JsonNode]] =
-  ## Returns the child node if it exists, or none.
+  ## Returns the child node if it exists, or nothing.
   ## Returns an error if `key` is int and `n` is not an array, or
   ## if `key` is string and `n` is not an object.
   if n.isDefined:
     n.get.mget(key)
   else:
-    JsonNode.none.rightS
+    JsonNode.nothing.rightS
 
 proc mget*(key: string|int): Maybe[JsonNode] -> EitherS[Maybe[JsonNode]] =
   (n: Maybe[JsonNode]) => n.mget(key)
@@ -63,7 +63,7 @@ proc value*[T](t: typedesc[T], n: JsonNode): EitherS[T] =
     {.fatal: "Can't get value of type " & $T}
 
 proc mvalue*[T](t: typedesc[T]): Maybe[JsonNode] -> EitherS[Maybe[T]] =
-  (n: Maybe[JsonNode]) => (if n.isDefined: value(T, n.get).map((v: T) => v.just) else: T.none.rightS)
+  (n: Maybe[JsonNode]) => (if n.isDefined: value(T, n.get).map((v: T) => v.just) else: T.nothing.rightS)
 
 type
   Jsonable* = concept t
@@ -92,7 +92,7 @@ proc toJson*[T](v: Maybe[T]): JsonNode =
 proc fromJson*[T](_: typedesc[Maybe[T]], n: JsonNode): Maybe[T] =
   mixin fromJson
   if n.isNil or n.kind == JNull:
-    T.none
+    T.nothing
   else:
     T.fromJson(n).just
 

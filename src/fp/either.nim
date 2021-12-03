@@ -257,7 +257,7 @@ proc traverse*[E, A, B](
   f: A -> Either[E, B]
 ): Either[E, Maybe[B]] =
   if opt.isEmpty:
-    B.none.right(E)
+    B.nothing.right(E)
   else:
     f(opt.get).map((b: B) => b.just)
 
@@ -303,7 +303,7 @@ proc asEitherF*[E,A](o: Maybe[A], e: () -> E): Either[E,A] =
 proc asMaybe*[E,A](e: Either[E,A]): Maybe[A] =
   ## Converts Either to Maybe type
   if e.isRight: e.get.just
-  else: A.none
+  else: A.nothing
 
 proc flip*[E,A](e: Either[E,A]): Either[A,E] =
   ## Flips Either's left and right parts
