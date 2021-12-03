@@ -20,3 +20,9 @@ While there is no documentation, you can see examples in the [tests/fp](tests/fp
 - Fixes some tests that were using some library that was not declared in the nimble file
 - Renames Option module to Maybe
   This way there are no clashes with nim's standard lib option, which were annoying when using this library and led to compilation errors
+
+This is not an official nimble package yet, so you can add it like this to your `nimble` file.
+
+``` nim
+requires "https://github.com/floscr/nimfp#master"
+```
