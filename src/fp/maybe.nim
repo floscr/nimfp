@@ -3,6 +3,7 @@ import sugar,
        classy,
        ./kleisli,
        ./function
+from options import nil
 
 {.experimental.}
 
@@ -134,6 +135,20 @@ proc orElse*[T](o: Maybe[T], d: Maybe[T]): Maybe[T] =
 proc orElse*[T](o: Maybe[T], f: void -> Maybe[T]): Maybe[T] =
   ## Returns `o` if defined, or the result of applying `f`
   if o.isDefined: o else: f()
+
+proc convertMaybe*[T](o: options.Option[T]): Maybe[T] =
+  ## Convert Option `o` to Maybe
+  if options.isSome(o):
+    just(options.unsafeGet(o))
+  else:
+    nothing(T)
+
+proc convertMaybe*[T](o: Maybe[T]): options.Option[T] =
+  ## Convert Maybe `o` to Option
+  if o.isDefined():
+    options.some(o.get())
+  else:
+    options.none(T)
 
 proc filter*[T](o: Maybe[T], p: T -> bool): Maybe[T] =
   ## Returns `o` if it is defined and the result of applying `p`

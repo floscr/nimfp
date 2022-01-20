@@ -1,4 +1,5 @@
 import ../../src/fp/maybe, unittest, sugar
+from options import nil
 
 suite "Maybe ADT":
 
@@ -69,6 +70,12 @@ suite "Maybe ADT":
     
     check: 2.just.orElse(() => 4.just) == 2.just
     check: 2.nothing.orElse(() => 4.just) == 4.just
+
+  test "Convert":
+    check: 2.just.convertMaybe == options.some(2)
+    check: options.some(2).convertMaybe == 2.just
+    check: 2.nothing.convertMaybe == options.none(int)
+    check: options.none(int).convertMaybe == 2.nothing
 
   test "Filter":
     let x = "123".just
