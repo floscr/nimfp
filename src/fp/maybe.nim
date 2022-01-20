@@ -7,13 +7,13 @@ import sugar,
 {.experimental.}
 
 type
-  MaybeKind = enum
+  MaybeKind* = enum
     okNothing, okJust
   Maybe*[T] = ref object
     ## Maybe ADT
     case kind: MaybeKind
     of okJust:
-      value: T
+      value*: T
     else:
       discard
 
