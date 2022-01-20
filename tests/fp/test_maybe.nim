@@ -10,8 +10,10 @@ suite "Maybe ADT":
     check: $n == "Nothing"
     check: s.isEmpty == false
     check: s.isDefined == true
+    check: s.isSome == true
     check: n.isDefined == false
     check: n.isEmpty == true
+    check: n.isNone == true
     check: s == Just("test")
     check: s != string.nothing
     check: n == Nothing[int]()

@@ -70,6 +70,27 @@ proc isDefined*[T](o: Maybe[T]): bool =
   ## Checks if `o` contains value
   not o.isEmpty
 
+proc isSome*[T](o: Maybe[T]): bool =
+  ## Implementation helper for fusion/matching
+  ## https://nim-lang.github.io/fusion/src/fusion/matching.html#matching-different-things-option-matching
+  ##
+  ## Example:
+  ##
+  ## .. code-block:: nim
+  ## case Just(x: int):
+  ##   of Some(1):
+  ##     "Some with captured value: 1"
+  ##   of Some(@a):
+  ##     "Some with other value: " & a.intToStr()
+  ##   else:
+  ##     "None"
+  o.isDefined()
+
+proc isNone*[T](o: Maybe[T]): bool =
+  ## Implementation helper for fusion/matching
+  ## See `isSome`
+  o.isEmpty()
+
 proc `$`*[T](o: Maybe[T]): string =
   ## Returns string representation of `o`
   if o.isDefined:
