@@ -4,8 +4,6 @@ import std/[
   strutils,
 ]
 
-import tryM from ./trym
-
 export stdOption.Option
 export stdOption.option
 export stdOption.some, stdOption.none
