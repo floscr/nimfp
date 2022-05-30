@@ -17,6 +17,12 @@ proc tap*[T, E](x: Result[T, E], okFn: T -> void): Result[T, E] =
     okFn(x.value)
   x
 
+proc tapErr*[T, E](x: Result[T, E], errFn: E -> void): Result[T, E] =
+  ## Applies side-effect `errFn` and returns orignal result `x`
+  if x.isErr():
+    errFn(x.error)
+  x
+
 proc bitap*[T, E](x: Result[T, E], errFn: E -> void, okFn: T -> void): Result[T, E] =
   ## Applies side-effect `errFn` or `okFn` and returns orignal result `x`
   if x.isOk():
@@ -35,10 +41,14 @@ when isMainModule:
   assert R.ok(1).tap((x: int) => (mutTap = x)) == R.ok(1)
   assert mutTap == 1
 
-  var mutTapOk: int
   var mutTapErr: string
-  assert R.ok(1).bitap((x: string) => (mutTapErr = x), (x: int) => (mutTapOk = x)) == R.ok(1)
-  assert mutTapOk == 1 and mutTapErr == ""
-  mutTapOk = 0
-  assert R.err("Error").bitap((x: string) => (mutTapErr = x), (x: int) => (mutTapOk = x)) == R.err("Error")
-  assert mutTapOk == 0 and mutTapErr == "Error"
+  assert R.err("Error").tapErr((x: string) => (mutTapErr = x)) == R.err("Error")
+  assert mutTapErr == "Error"
+
+  var mutBitapOk: int
+  var mutBitapErr: string
+  assert R.ok(1).bitap((x: string) => (mutBitapErr = x), (x: int) => (mutBitapOk = x)) == R.ok(1)
+  assert mutBitapOk == 1 and mutBitapErr == ""
+  mutBitapOk = 0
+  assert R.err("Error").bitap((x: string) => (mutBitapErr = x), (x: int) => (mutBitapOk = x)) == R.err("Error")
+  assert mutBitapOk == 0 and mutBitapErr == "Error"
