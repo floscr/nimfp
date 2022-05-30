@@ -5,7 +5,7 @@ import std/[
 
 export results
 
-proc fold*[T0, E, T1](x: Result[T0, E], okFn: T0 -> T1, errFn: E -> T1): T1 =
+proc fold*[T0, E, T1](x: Result[T0, E], errFn: E -> T1, okFn: T0 -> T1): T1 =
   if x.isOk():
     okFn(x.value)
   else:
@@ -14,5 +14,5 @@ proc fold*[T0, E, T1](x: Result[T0, E], okFn: T0 -> T1, errFn: E -> T1): T1 =
 when isMainModule:
   type R = Result[int, string]
 
-  assert R.ok(1).fold((x: int) => x, (x: string) => 0) == 1
-  assert R.err("Error").fold((x: int) => $x, (x: string) => x) == "Error"
+  assert R.ok(1).fold((x: string) => 0, (x: int) => x) == 1
+  assert R.err("Error").fold((x: string) => x, (x: int) => $x) == "Error"
