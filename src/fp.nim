@@ -1,5 +1,6 @@
 import ./fp/maybe,
        ./fp/option,
+       ./fp/resultM,
        ./fp/list,
        ./fp/either,
        ./fp/trym,
