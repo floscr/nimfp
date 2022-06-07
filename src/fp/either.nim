@@ -1,10 +1,14 @@
-import sugar,
-       boost/types,
-       classy,
-       ./list,
+import std/[
+  macros,
+  osproc,
+  strutils,
+  sugar,
+]
+import boost/types
+import classy
+import ./list,
        ./maybe,
        ./kleisli,
-       macros,
        ./function
 
 {.experimental.}
@@ -383,3 +387,19 @@ proc point*[E,A](v: A, e: typedesc[Either[E,A]]): Either[E,A] =
 
 instance KleisliInst, E => Either[E,_], exporting(_)
 
+proc sh*(cmd: string, opts = {poStdErrToStdOut}): Either[string, string] =
+  ## Execute a shell command `cmd` and wrap it in an Either
+  let (res, exitCode) = execCmdEx(cmd, opts)
+  if exitCode == 0:
+    res
+    .strip()
+    .right(string)
+  else:
+    res
+    .strip()
+    .left(string)
+
+when isMainModule:
+  assert sh("true").isRight()
+  assert sh("false").isLeft()
+  assert sh("ls --nonexistent").isLeft() == true
