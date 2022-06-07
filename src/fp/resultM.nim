@@ -1,6 +1,8 @@
 import results
 import std/[
   sugar,
+  strutils,
+  osproc,
 ]
 
 export results
@@ -31,6 +33,18 @@ proc bitap*[T, E](x: Result[T, E], errFn: E -> void, okFn: T -> void): Result[T,
     errFn(x.error)
   x
 
+proc sh*(cmd: string, opts = {poStdErrToStdOut}): Result[string, string] =
+  ## Execute a shell command `cmd` and wrap it in an result
+  let (res, exitCode) = execCmdEx(cmd, opts)
+  if exitCode == 0:
+    res
+    .strip()
+    .ok()
+  else:
+    res
+    .strip()
+    .err()
+
 when isMainModule:
   type R = Result[int, string]
 
@@ -52,3 +66,7 @@ when isMainModule:
   mutBitapOk = 0
   assert R.err("Error").bitap((x: string) => (mutBitapErr = x), (x: int) => (mutBitapOk = x)) == R.err("Error")
   assert mutBitapOk == 0 and mutBitapErr == "Error"
+
+  assert sh("true").isOk()
+  assert sh("false").isErr()
+  assert sh("ls --nonexistent").isErr() == true
