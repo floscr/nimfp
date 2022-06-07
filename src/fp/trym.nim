@@ -70,6 +70,13 @@ proc getError*[A](v: Try[A]): ref Exception =
 proc getErrorMessage*[A](v: Try[A]): string =
   ## Returns the exception message
   v.getError.msg
+  
+proc fold*[A,B](v: Try[A], ifFailure: ref Exception -> B, ifSuccess: A -> B): B =
+  ## Applies `ifFailure` if `v` is left, or `ifSuccess` if `v` is right
+  if v.isFailure():
+    ifFailure(v.getError())
+  else:
+    ifSuccess(v.get())
 
 proc getErrorStack*[A](v: Try[A]): string =
   ## Returns the exception stack trace
@@ -100,3 +107,11 @@ proc mapErrorMessage*[A](v: Try[A], f: string -> string): Try[A] =
     errCopy.failure(A)
   else:
     v
+
+when isMainModule:
+  import strutils
+
+  # fold
+  assert tryET("F".parseInt()).fold((x: ref Exception) => "Fail", (x: int) => "Suc") == "Fail"
+  assert "Suc".success().fold((x: ref Exception) => x.msg, (x: string) => x) == "Suc"
+  assert "Fail".failure(string).fold((x: ref Exception) => x.msg, (x: string) => x) == "Fail"
