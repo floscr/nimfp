@@ -131,16 +131,20 @@ proc mapErrorMessage*[A](v: Try[A], f: string -> string): Try[A] =
 when isMainModule:
   import strutils
 
-  # fold
-  assert tryET("F".parseInt()).fold((x: ref Exception) => "Fail", (x: int) => "Suc") == "Fail"
-  assert "Suc".success().fold((x: ref Exception) => x.msg, (x: string) => x) == "Suc"
-  assert "Fail".failure(string).fold((x: ref Exception) => x.msg, (x: string) => x) == "Fail"
+  block fold:
+    assert tryET("F".parseInt()).fold((x: ref Exception) => "Fail", (x: int) => "Suc") == "Fail"
+    assert "Suc".success().fold((x: ref Exception) => x.msg, (x: string) => x) == "Suc"
+    assert "Fail".failure(string).fold((x: ref Exception) => x.msg, (x: string) => x) == "Fail"
 
-  # tap
-  var mutBitapOk: int
-  var mutBitapErr: string
-  assert tryET("1".parseInt()).bitap((x: ref Exception) => (mutBitapErr = x.msg), (x: int) => (mutBitapOk = x)) == 1.success()
-  assert mutBitapOk == 1 and mutBitapErr == ""
-  mutBitapOk = 0
-  assert tryET("Fail".parseInt()).bitap((x: ref Exception) => (mutBitapErr = "Error"), (x: int) => (mutBitapOk = x)).isFailure()
-  assert mutBitapOk == 0 and mutBitapErr == "Error"
+  block filter:
+    assert success(1).filter((x: int) => x == 1, "Fail").get() == 1
+    assert success(1).filter((x: int) => x == 0, "Fail").getErrorMessage() == "Fail"
+
+  block tap:
+    var mutBitapOk: int
+    var mutBitapErr: string
+    assert tryET("1".parseInt()).bitap((x: ref Exception) => (mutBitapErr = x.msg), (x: int) => (mutBitapOk = x)) == 1.success()
+    assert mutBitapOk == 1 and mutBitapErr == ""
+    mutBitapOk = 0
+    assert tryET("Fail".parseInt()).bitap((x: ref Exception) => (mutBitapErr = "Error"), (x: int) => (mutBitapOk = x)).isFailure()
+    assert mutBitapOk == 0 and mutBitapErr == "Error"
