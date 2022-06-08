@@ -71,13 +71,17 @@ proc getErrorMessage*[A](v: Try[A]): string =
   ## Returns the exception message
   v.getError.msg
 
-proc filter*[A](v: Try[A], p: A -> bool, error: string): Try[A] =
+proc filter*[A](v: Try[A], p: A -> bool, ifFailure: A -> string): Try[A] =
   ## Returns `v` if it is defined and the result of applying `p`to it's value is true
   ## Otherwise apply the `error` to `v`
-  if v.isSuccess() and p(v.get()):
-    v
+  if v.isSuccess():
+    if p(v.get()):
+      v
+    else:
+      failure(ifFailure(v.get()), A)
   else:
-    failure(error, A)
+    v
+
 
 proc fold*[A,B](v: Try[A], ifFailure: ref Exception -> B, ifSuccess: A -> B): B =
   ## Applies `ifFailure` if `v` is left, or `ifSuccess` if `v` is right
@@ -145,8 +149,9 @@ when isMainModule:
     assert "Fail".failure(string).fold((x: ref Exception) => x.msg, (x: string) => x) == "Fail"
 
   block filter:
-    assert success(1).filter((x: int) => x == 1, "Fail").get() == 1
-    assert success(1).filter((x: int) => x == 0, "Fail").getErrorMessage() == "Fail"
+    assert success(1).filter((x: int) => x == 1, (_: int) => "Fail").get() == 1
+    assert success(1).filter((x: int) => x == 0, (_: int) => "Fail").getErrorMessage() == "Fail"
+    assert failure("Dont Override Fail", int).filter((x: int) => x == 0, (_: int) => "Fail").getErrorMessage() == "Dont Override Fail"
 
   block tap:
     var mutBitapOk: int
