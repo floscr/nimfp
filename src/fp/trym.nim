@@ -70,7 +70,15 @@ proc getError*[A](v: Try[A]): ref Exception =
 proc getErrorMessage*[A](v: Try[A]): string =
   ## Returns the exception message
   v.getError.msg
-  
+
+proc filter*[A](v: Try[A], p: A -> bool, error: string): Try[A] =
+  ## Returns `v` if it is defined and the result of applying `p`to it's value is true
+  ## Otherwise apply the `error` to `v`
+  if v.isSuccess() and p(v.get()):
+    v
+  else:
+    failure(error, A)
+
 proc fold*[A,B](v: Try[A], ifFailure: ref Exception -> B, ifSuccess: A -> B): B =
   ## Applies `ifFailure` if `v` is left, or `ifSuccess` if `v` is right
   if v.isFailure():
