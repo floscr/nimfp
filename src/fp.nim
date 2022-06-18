@@ -10,7 +10,8 @@ import ./fp/maybe,
        ./fp/forcomp,
        ./fp/mtransf,
        ./fp/iterable,
-
+       ./fp/seqM,
+       ./fp/intM,
        ./fp/std/jsonops
 
 export maybe,
@@ -25,5 +26,6 @@ export maybe,
        forcomp,
        mtransf,
        iterable,
-
+       seqM,
+       intM,
        jsonops
