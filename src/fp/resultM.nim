@@ -33,6 +33,10 @@ proc bitap*[T, E](x: Result[T, E], errFn: E -> void, okFn: T -> void): Result[T,
     errFn(x.error)
   x
 
+proc log*[T, E](x: Result[T, E], prefix = ""): Result[T, E] =
+  discard x.tap((x: T) => echo(prefix & $x))
+  x
+
 proc sh*(cmd: string, opts = {poStdErrToStdOut}): Result[string, string] =
   ## Execute a shell command `cmd` and wrap it in an result
   let (res, exitCode) = execCmdEx(cmd, opts)
@@ -47,6 +51,7 @@ proc sh*(cmd: string, opts = {poStdErrToStdOut}): Result[string, string] =
 
 when isMainModule:
   type R = Result[int, string]
+  type RS = Result[string, string]
 
   assert R.ok(1).fold((x: string) => 0, (x: int) => x) == 1
   assert R.err("Error").fold((x: string) => x, (x: int) => $x) == "Error"
@@ -59,14 +64,20 @@ when isMainModule:
   assert R.err("Error").tapErr((x: string) => (mutTapErr = x)) == R.err("Error")
   assert mutTapErr == "Error"
 
-  var mutBitapOk: int
-  var mutBitapErr: string
-  assert R.ok(1).bitap((x: string) => (mutBitapErr = x), (x: int) => (mutBitapOk = x)) == R.ok(1)
-  assert mutBitapOk == 1 and mutBitapErr == ""
-  mutBitapOk = 0
-  assert R.err("Error").bitap((x: string) => (mutBitapErr = x), (x: int) => (mutBitapOk = x)) == R.err("Error")
-  assert mutBitapOk == 0 and mutBitapErr == "Error"
+  block testBiTap:
+    var mutBitapOk: int
+    var mutBitapErr: string
+    assert R.ok(1).bitap((x: string) => (mutBitapErr = x), (x: int) => (mutBitapOk = x)) == R.ok(1)
+    assert mutBitapOk == 1 and mutBitapErr == ""
+    mutBitapOk = 0
+    assert R.err("Error").bitap((x: string) => (mutBitapErr = x), (x: int) => (mutBitapOk = x)) == R.err("Error")
+    assert mutBitapOk == 0 and mutBitapErr == "Error"
 
-  assert sh("true").isOk()
-  assert sh("false").isErr()
-  assert sh("ls --nonexistent").isErr() == true
+  block testSh:
+    assert sh("true").isOk()
+    assert sh("false").isErr()
+    assert sh("ls --nonexistent").isErr() == true
+
+  block testLog:
+    assert R.ok(1).log("Logger Test (int): ") == R.ok(1)
+    assert RS.ok("Log Test").log("Logger Test (string): ") == RS.ok("Log Test")
